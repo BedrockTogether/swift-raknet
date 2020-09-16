@@ -21,7 +21,8 @@ public class Connection {
     
     var sendDatagrams = [Int32 : Datagram]() // we store packets if they will need resending
     
-    var outgoingPackets = [Datagram?]() //packets to send
+    //TODO: Packet Weights
+    //var outgoingPackets = [Datagram?]() //packets to send
     
     var outgoingPacket = Datagram() // current datagram to send
     
@@ -76,8 +77,6 @@ public class Connection {
             var buf = self.listener!.channel!.allocator.buffer(capacity: Int(self.mtu - 4))
             pk.encode(&buf)
             self.sendPacket(&buf)
-           // print("ack \(self.ackQueue)")
-            self.ackQueue = []
         }
         
         if(self.nackQueue.count > 0){
@@ -85,37 +84,39 @@ public class Connection {
             var buf = self.listener!.channel!.allocator.buffer(capacity: Int(self.mtu - 4))
             pk.encode(&buf)
             self.sendPacket(&buf)
-            //print("nack\(self.ackQueue)")
-            self.nackQueue = []
         }
         
-        if(self.outgoingPackets.count > 0){
-            var limit = 16
-            var size = self.outgoingPackets.count
-            while size > 0 {
-                let packet = self.outgoingPackets[0]
-                packet!.sendTime = timestamp
-                self.sendDatagrams[Int32(packet!.sequenceNumber)] = packet
-                self.outgoingPackets.dropFirst()
-                
-                size -= 1
-                limit -= 1
-                
-                if(limit <= 0){
-                    break
-                }
-            }
-            
-            if(self.outgoingPackets.count > 2048){
-                self.outgoingPackets = []
-            }
-        }
+//        if(self.outgoingPackets.count > 0){
+//            var limit = 16
+//            var size = self.outgoingPackets.count
+//            while size > 0 {
+//                let packet = self.outgoingPackets[0]
+//                packet!.sendTime = timestamp
+//                self.sendDatagrams[Int32(packet!.sequenceNumber)] = packet
+//                self.outgoingPackets.dropFirst()
+//
+//                size -= 1
+//                limit -= 1
+//
+//                if(limit <= 0){
+//                    break
+//                }
+//            }
+//
+//            if(self.outgoingPackets.count > 2048){
+//                self.outgoingPackets = []
+//            }
+//        }
         
         for (seq, pk) in self.sendDatagrams {
+            let temp = self.outgoingPacket
             if pk.sendTime < (Int64(NSDate().timeIntervalSince1970 * 1000) - 8) {
-                self.outgoingPackets.append(pk)
+//                self.outgoingPackets.append(pk)
+                self.outgoingPacket = pk
+                self.sendQueue()
                 self.sendDatagrams[seq] = nil
             }
+            self.outgoingPacket = temp
         }
         
         var size = self.recievedWindow.count
@@ -205,18 +206,18 @@ public class Connection {
     func handleNACK(_ buf : inout ByteBuffer){
         let pk = NACK()
         pk.decode(&buf)
+        let temp = self.outgoingPacket
         for seq in pk.packets {
             for i in seq.start...seq.end {
                 if self.sendDatagrams[Int32(i)] != nil {
-                    let packet = self.sendDatagrams[Int32(i)]
-                    packet!.sequenceNumber = UInt32(self.sendSequenceNumber)
-                    self.sendSequenceNumber += 1
-                    self.outgoingPackets.append(packet)
+                    self.outgoingPacket = self.sendDatagrams[Int32(i)]!
+                    self.sendQueue()
+                    //self.outgoingPackets.append(packet)
                     self.sendDatagrams[Int32(i)] = nil
                 }
             }
-            
         }
+        self.outgoingPacket = temp
     }
     
     func handleDatagram(_ buf : inout ByteBuffer){
@@ -343,7 +344,7 @@ public class Connection {
                     
                     let port = self.listener!.channel!.localAddress!.port!
                     if pk.address!.port! == port {
-                        //print("connected \(self.address!)")
+                        print("connected \(self.address!)")
                         self.state = .CONNECTED
                         self.listener!.connectionListener!.onOpenConnection(self)
                     }

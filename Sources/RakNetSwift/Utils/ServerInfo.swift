@@ -30,6 +30,6 @@ public class ServerInfo {
     }
     
     func toString() -> String {
-        return "MCPE;\(self.motd);\(self.version);\(self.protocolVersion);\(self.currentPlayers);\(self.maxPlayers);\(self.serverId);\(self.name);\(self.gamemode)";
+        return "MCPE;\(self.motd);\(self.protocolVersion);\(self.version);\(self.currentPlayers);\(self.maxPlayers);\(self.serverId);\(self.name);\(self.gamemode)";
     }
 }

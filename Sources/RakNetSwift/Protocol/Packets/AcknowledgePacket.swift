@@ -30,6 +30,7 @@ class AcknowledgePacket : Packet {
         
         if packets.count > 0 {
             var i = 1
+            var firstIndex = 0
             var start = packets[0]
             var end = packets[0]
             
@@ -40,38 +41,41 @@ class AcknowledgePacket : Packet {
                 if length == 1 {
                     end = current
                 } else if length > 1 {
-//                    if(start == end){
-//                        if(self.mtu < 4){
-//                            break
-//                        }
-//                        self.mtu -= 4
-//                    } else {
-//                        if(self.mtu < 7) {
-//                            break
-//                        }
-//                        self.mtu -= 7
-//                    }
+                    if(start == end){
+                        if(self.mtu < 4){
+                            break
+                        }
+                        self.mtu -= 4
+                    } else {
+                        if(self.mtu < 7) {
+                            break
+                        }
+                        self.mtu -= 7
+                    }
                     self.packets.append(Entry(start, end))
                     start = current
                     end = current
+                    firstIndex = i
                 }
             }
             if(start == end){
-//                if(self.mtu >= 4) {
-//                    self.packets.append(Entry(start))
-//                    self.mtu -= 4
-//                }
-                self.packets.append(Entry(start))
+                if(self.mtu >= 4) {
+                    self.packets.append(Entry(start))
+                    self.mtu -= 4
+                }
+                firstIndex = i
+                //self.packets.append(Entry(start))
             } else if(start != end){
-//                if(self.mtu >= 7){
-//                    self.packets.append(Entry(start, end))
-//                    self.mtu -= 7
-//                }
-                self.packets.append(Entry(start, end))
+                if(self.mtu >= 7){
+                    self.packets.append(Entry(start, end))
+                    self.mtu -= 7
+                }
+                firstIndex = i
+                //self.packets.append(Entry(start, end))
             }
-//            if(self.packets.count > 0){
-//                packets.removeFirst(i)
-//            }
+            if(self.packets.count > 0){
+                packets.removeFirst(firstIndex)
+            }
         }
         super.init(id)
     }
