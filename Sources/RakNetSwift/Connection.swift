@@ -21,11 +21,11 @@ public class Connection {
     
     var sendDatagrams = [Int32 : Datagram]() // we store packets if they will need resending
     
-    var outgoingPackets = [Datagram?]() //packets we use to build datagram
+    var outgoingPackets = [Datagram?]() //packets to send
     
     var outgoingPacket = Datagram() // current datagram to send
     
-    var splitPacket = [Int32 : [Int32 : EncapsulatedPacket]]() //recived packets that we will build datagram with
+    var splitPacket = [Int32 : [Int32 : EncapsulatedPacket]]() //recived splitted packets that we will be reassembled
     
     var windowStart : Int32 = -1
     var windowEnd : Int32 = 2048
@@ -237,7 +237,7 @@ public class Connection {
         }
         
         // Add the packet to the ack queue
-        // to let know client we sent the packet
+        // to let know client we get the packet
         self.ackQueue.append(packet.sequenceNumber)
         
         // Add the packet to the received window, a property that keeps
@@ -249,8 +249,8 @@ public class Connection {
         // Check if the sequence is broken
         if(diff != 1) {
             for i in (self.lastSequenceNumber + 1)..<Int32(packet.sequenceNumber) {
-                // Adding the packet sequence number to the NACK queue and then sending a NACK
-                // will make the Client sending again the lost packet
+                // Mark the packet sequence number as lost
+                // so client will resend it
                 if !self.recievedWindow.contains(i) {
                     self.nackQueue.append(UInt32(i))
                 }
@@ -393,7 +393,6 @@ public class Connection {
             let maxLength = self.mtu - 28 - 4 - 2
             let split = ((packet.buffer!.readableBytes - 1) / Int(maxLength)) + 1
             for _ in 0..<split {
-                // Push format: [chunk index: int, chunk: buffer]
                 buffers.append(packet.buffer!.readSlice(length: min(Int(maxLength), packet.buffer!.readableBytes))!)
             }
             self.splitId += 1
