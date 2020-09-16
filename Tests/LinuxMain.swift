@@ -3,5 +3,5 @@ import XCTest
 import RakNetNIOTests
 
 var tests = [XCTestCaseEntry]()
-tests += RakNetNIOTests.allTests()
+tests += RakNetSwiftTests.allTests()
 XCTMain(tests)

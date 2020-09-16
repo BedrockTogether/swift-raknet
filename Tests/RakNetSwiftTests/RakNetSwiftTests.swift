@@ -1,7 +1,7 @@
 import XCTest
-@testable import RakNetNIO
+@testable import RakNetSwift
 
-final class RakNetNIOTests: XCTestCase {
+final class RakNetSwiftTests: XCTestCase {
     func testExample() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct

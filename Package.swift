@@ -4,12 +4,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "RakNetNIO",
+    name: "swift-raknet",
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
-            name: "RakNetNIO",
-            targets: ["RakNetNIO"]),
+            name: "RakNetSwift",
+            targets: ["RakNetSwift"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0")
@@ -20,12 +20,12 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
-            name: "RakNetNIO",
+            name: "RakNetSwift",
             dependencies: [.product(name: "NIO", package: "swift-nio")]),
         .target(name: "Test",
-                dependencies: ["RakNetNIO"]),
+                dependencies: ["RakNetSwift"]),
         .testTarget(
-            name: "RakNetNIOTests",
-            dependencies: ["RakNetNIO"]),
+            name: "RakNetSwiftTests",
+            dependencies: ["RakNetSwift"]),
     ]
 )

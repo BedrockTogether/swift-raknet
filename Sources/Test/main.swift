@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import RakNetNIO
+import RakNetSwift
 
 do {
     let listener = Listener()
