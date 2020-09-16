@@ -30,16 +30,17 @@ public class Listener {
     
     var bootstrap : DatagramBootstrap?
     
-    var serverListener : ConnectionListener?
+    var connectionListener : ConnectionListener?
     
     public init () {
         
     }
     
-    public func listen(_ serverInfo : ServerInfo, _ host : String = "0.0.0.0", _ port : Int = 19132) -> EventLoopFuture<Void>? {
+    public func listen<T : ConnectionListener>(_ connectionListener : T?, _ serverInfo : ServerInfo, _ host : String = "0.0.0.0", _ port : Int = 19132) -> EventLoopFuture<Void>? {
         let handler = ServerDatagramHandler()
         handler.listener = self
         self.info = serverInfo
+        self.connectionListener = connectionListener
         bootstrap = DatagramBootstrap(group: group).channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             
             // Set the handlers that are applied to the bound channel
@@ -115,7 +116,7 @@ public class Listener {
                 self.connections[addr!] = nil
             }
         })
-        self.serverListener!.onCloseConnection(connection.address!, reason)
+        self.connectionListener!.onCloseConnection(connection.address!, reason)
     }
     
     

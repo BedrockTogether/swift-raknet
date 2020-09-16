@@ -175,7 +175,7 @@ public class Connection {
                         let port = self.address!.port!
                         if pk.address!.port! == port {
                             self.state = .CONNECTED
-                            self.listener!.serverListener!.onOpenConnection(self)
+                            self.listener!.connectionListener!.onOpenConnection(self)
                         }
                     }
                 }
@@ -345,7 +345,7 @@ public class Connection {
                     if pk.address!.port! == port {
                         //print("connected \(self.address!)")
                         self.state = .CONNECTED
-                        self.listener!.serverListener!.onOpenConnection(self)
+                        self.listener!.connectionListener!.onOpenConnection(self)
                     }
                 }
             } else if id == PacketIdentifiers.DisconnectNotification {
@@ -365,7 +365,7 @@ public class Connection {
             }
         } else if self.state == .CONNECTED {
             //print("con: \(id)")
-            self.listener!.serverListener!.onEncapsulated(packet, self.address!)
+            self.listener!.connectionListener!.onEncapsulated(packet, self.address!)
         }
     }
     
