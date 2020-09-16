@@ -18,6 +18,7 @@ Example listener [swift-raknet/Sources/Test/main.swift](https://github.com/Extol
 - [ ] Use fast data structure instead of swift standard library
 - [ ] Stability tweaks
 - [ ] Reliability tweaks
+- [ ] Better documentation 
 
 ## Thanks
 Huge thanks to creators of listed below repository creators for valuable source of knowledge.
