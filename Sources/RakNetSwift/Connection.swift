@@ -1,8 +1,9 @@
 //
-//  File.swift
-//  
+//  Connection.swift
+//  RakNetSwift
 //
 //  Created by Extollite on 13/09/2020.
+//  Copyright © 2020 Extollite. All rights reserved.
 //
 
 import Foundation
@@ -49,7 +50,7 @@ public class Connection {
     var splitId : Int32 = 0
     
     var lastUpdate : Int64 = Int64(NSDate().timeIntervalSince1970 * 1000)
-    
+        
     var isActive = false
     
     init(_ listener : Listener, _ mtu : Int32, _ address : SocketAddress){
@@ -75,6 +76,7 @@ public class Connection {
         if(self.ackQueue.count > 0){
             let pk = ACK(&self.ackQueue, Int32(self.mtu - 5))
             var buf = self.listener!.channel!.allocator.buffer(capacity: Int(self.mtu - 4))
+            print("ack: \(self.ackQueue)")
             pk.encode(&buf)
             self.sendPacket(&buf)
         }
@@ -82,6 +84,7 @@ public class Connection {
         if(self.nackQueue.count > 0){
             let pk = NACK(&self.nackQueue, Int32(self.mtu - 5))
             var buf = self.listener!.channel!.allocator.buffer(capacity: Int(self.mtu - 4))
+            print("nack: \(self.ackQueue)")
             pk.encode(&buf)
             self.sendPacket(&buf)
         }
@@ -138,20 +141,20 @@ public class Connection {
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
         let datagram = (header & Flags.FLAG_VALID) != 0
-        //print("id: \(header)")
+        print("id: \(header)")
         if datagram {
             if (header & Flags.FLAG_ACK) != 0 {
-                //print("ack")
+                print("ack")
                 self.handleACK(&buf)
             } else if (header & Flags.FLAG_NACK) != 0 {
-                //print("nack")
+                print("nack")
                 self.handleNACK(&buf)
             } else {
-                //print("datagram")
+                print("datagram")
                 self.handleDatagram(&buf)
             }
         } else {
-            //print("else")
+            print("else")
             if(header < 0x80) {
                 if(self.state == State.CONNECTING) {
                     if(header == PacketIdentifiers.ConnectionRequest){
@@ -189,7 +192,7 @@ public class Connection {
         packet.decode(&buf)
         for seq in packet.packets {
             for i in seq.start...seq.end {
-                //print("ackSeq: \(i)")
+                print("ackSeq: \(i)")
                 if self.sendDatagrams[Int32(i)] != nil {
                     for pk in self.sendDatagrams[Int32(i)]!.packets {
                         if pk != nil && pk!.needACK && pk!.messageIndex != -1 {
@@ -321,7 +324,7 @@ public class Connection {
         }
         
         let id = packet.buffer!.readInteger(as: UInt8.self)!
-        //print("packet: \(id)")
+        print("packet: \(id)")
         packet.buffer!.moveReaderIndex(to: 0)
         if(id < 0x80) {
             if(self.state == State.CONNECTING) {
@@ -365,7 +368,7 @@ public class Connection {
                 self.addToQueue(sendPk, Priority.IMMEDIATE)
             }
         } else if self.state == .CONNECTED {
-            //print("con: \(id)")
+            print("con: \(id)")
             self.listener!.connectionListener!.onEncapsulated(packet, self.address!)
         }
     }

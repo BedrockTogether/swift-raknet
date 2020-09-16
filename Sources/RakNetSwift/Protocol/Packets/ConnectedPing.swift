@@ -1,10 +1,10 @@
 //
-//  File.swift
-//  
+//  ConnectedPing.swift
+//  RakNetSwift
 //
 //  Created by Extollite on 12/09/2020.
+//  Copyright © 2020 Extollite. All rights reserved.
 //
-
 import Foundation
 import NIO
 
