@@ -3,6 +3,14 @@
 
 Simple RakNet server built with usage of [SwiftNIO](https://github.com/apple/swift-nio).
 
+## Usage
+Add to Package.swift:
+```swift
+.package(url: "https://github.com/Extollite/swift-raknet", from: ...)
+```
+
+Example listener [swift-raknet/Sources/Test/main.swift](https://github.com/Extollite/swift-raknet/blob/master/Sources/Test/main.swift)
+
 ## Todo
 - [x] Server-Client handshake
 - [x] Packets reassembly
