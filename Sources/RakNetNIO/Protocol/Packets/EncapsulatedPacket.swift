@@ -8,7 +8,7 @@
 import Foundation
 import NIO
 
-class EncapsulatedPacket {
+public class EncapsulatedPacket {
     var reliability : Reliability?
     var priority : Priority?
     var messageIndex : Int32? = nil

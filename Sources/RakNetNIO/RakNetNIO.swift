@@ -20,7 +20,7 @@ public class Listener {
     
     var id = Int64(arc4random()) &+ (Int64(arc4random()) << 32)
     
-    //var motd = Motd()
+    var info : ServerInfo?
     
     var channel : Channel?
     
@@ -36,9 +36,10 @@ public class Listener {
         
     }
     
-    public func listen(_ host : String = "0.0.0.0", _ port : Int = 19132) -> EventLoopFuture<Void>? {
+    public func listen(_ serverInfo : ServerInfo, _ host : String = "0.0.0.0", _ port : Int = 19132) -> EventLoopFuture<Void>? {
         let handler = ServerDatagramHandler()
         handler.listener = self
+        self.info = serverInfo
         bootstrap = DatagramBootstrap(group: group).channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             
             // Set the handlers that are applied to the bound channel
@@ -152,7 +153,7 @@ public class Listener {
                     }
                     
                     let pk = UnconnectedPong()
-                    let motd = "MCPE;XD;409;1.16.20;0;5;0;Test;Creative"
+                    let motd = listener!.info!.toString()
                     let packetLength = 35 + motd.count
                     var buffer = context.channel.allocator.buffer(capacity: packetLength)
                     pk.serverId = listener!.id

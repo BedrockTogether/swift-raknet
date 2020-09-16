@@ -343,7 +343,7 @@ public class Connection {
                     
                     let port = self.listener!.channel!.localAddress!.port!
                     if pk.address!.port! == port {
-                        print("connected \(self.address!)")
+                        //print("connected \(self.address!)")
                         self.state = .CONNECTED
                         self.listener!.serverListener!.onOpenConnection(self)
                     }
@@ -364,7 +364,7 @@ public class Connection {
                 self.addToQueue(sendPk, Priority.IMMEDIATE)
             }
         } else if self.state == .CONNECTED {
-            print("con: \(id)")
+            //print("con: \(id)")
             self.listener!.serverListener!.onEncapsulated(packet, self.address!)
         }
     }
