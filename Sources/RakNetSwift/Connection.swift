@@ -13,7 +13,7 @@ public class Connection {
     
     var listener : Listener?
     var mtu : Int32 = 0
-    var address : SocketAddress?
+    public var address : SocketAddress?
     
     var state : State = .CONNECTING //client connection state
     
