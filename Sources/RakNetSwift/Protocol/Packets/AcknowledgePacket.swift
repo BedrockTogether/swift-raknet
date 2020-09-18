@@ -63,15 +63,16 @@ class AcknowledgePacket : Packet {
                 if(self.mtu >= 4) {
                     self.packets.append(Entry(start))
                     self.mtu -= 4
+                    firstIndex = i
                 }
-                firstIndex = i
+
                 //self.packets.append(Entry(start))
             } else if(start != end){
                 if(self.mtu >= 7){
                     self.packets.append(Entry(start, end))
                     self.mtu -= 7
+                    firstIndex = i
                 }
-                firstIndex = i
                 //self.packets.append(Entry(start, end))
             }
             if(self.packets.count > 0){
