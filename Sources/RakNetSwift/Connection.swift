@@ -373,7 +373,7 @@ public class Connection {
         }
     }
     
-    func addEncapsulatedToQueue(_ packet : EncapsulatedPacket, _ flags : Priority = .NORMAL) {
+    public func addEncapsulatedToQueue(_ packet : EncapsulatedPacket, _ flags : Priority = .NORMAL) {
         packet.needACK = ((flags.rawValue & 0b00001000) > 0)
         if packet.needACK {
             self.needACK[packet.ackId] = nil

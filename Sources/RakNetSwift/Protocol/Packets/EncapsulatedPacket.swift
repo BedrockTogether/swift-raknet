@@ -10,7 +10,7 @@ import Foundation
 import NIO
 
 public class EncapsulatedPacket {
-    var reliability : Reliability?
+    public var reliability : Reliability?
     var priority : Priority?
     var messageIndex : Int32? = nil
     var sequenceIndex : Int32 = 0

@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum Priority : Int {
+public enum Priority : Int {
     case NORMAL
     case IMMEDIATE
 }
