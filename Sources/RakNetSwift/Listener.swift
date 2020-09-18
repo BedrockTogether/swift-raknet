@@ -33,6 +33,10 @@ public class Listener {
     
     var connectionListener : ConnectionListener?
     
+    public init(){
+        
+    }
+    
     public func listen<T : ConnectionListener>(_ connectionListener : T?, _ serverInfo : ServerInfo, _ host : String = "0.0.0.0", _ port : Int = 19132) -> EventLoopFuture<Void>? {
         let handler = ServerDatagramHandler()
         handler.listener = self
