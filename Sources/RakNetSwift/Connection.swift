@@ -369,11 +369,11 @@ public class Connection {
             }
         } else if self.state == .CONNECTED {
             print("con: \(id)")
-            self.listener!.connectionListener!.onEncapsulated(packet, self.address!)
+            self.listener!.connectionListener!.onEncapsulated(packet.buffer!, self.address!)
         }
     }
     
-    public func addEncapsulatedToQueue(_ packet : EncapsulatedPacket, _ flags : Priority = .NORMAL) {
+    func addEncapsulatedToQueue(_ packet : EncapsulatedPacket, _ flags : Priority = .NORMAL) {
         packet.needACK = ((flags.rawValue & 0b00001000) > 0)
         if packet.needACK {
             self.needACK[packet.ackId] = nil
@@ -424,6 +424,20 @@ public class Connection {
         } else {
             self.addToQueue(packet, flags)
         }
+    }
+    
+    public func sendDataPacket(_ buf : inout ByteBuffer){
+        let packet = EncapsulatedPacket()
+        packet.reliability = Reliability.UNRELIABLE
+        packet.buffer = buf
+        self.addEncapsulatedToQueue(packet)
+    }
+    
+    public func sendDataPacketImmediately(_ buf : inout ByteBuffer){
+        let packet = EncapsulatedPacket()
+        packet.reliability = Reliability.UNRELIABLE
+        packet.buffer = buf
+        self.addEncapsulatedToQueue(packet, Priority.IMMEDIATE)
     }
     
     func addToQueue(_ packet : EncapsulatedPacket, _ flags : Priority = .NORMAL) {

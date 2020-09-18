@@ -9,8 +9,8 @@
 import Foundation
 import NIO
 
-public class EncapsulatedPacket {
-    public var reliability : Reliability?
+class EncapsulatedPacket {
+    var reliability : Reliability?
     var priority : Priority?
     var messageIndex : Int32? = nil
     var sequenceIndex : Int32 = 0
@@ -20,12 +20,12 @@ public class EncapsulatedPacket {
     var splitCount : Int32 = 0
     var splitId : Int32 = 0
     var splitIndex : Int32 = 0
-    public var buffer : ByteBuffer?
+    var buffer : ByteBuffer?
     
     var needACK = false
     var ackId : Int32 = 0
     
-    public func decode(_ buf : inout ByteBuffer) {
+    func decode(_ buf : inout ByteBuffer) {
         let flags = Int32(buf.readInteger(as: Int8.self)!)
         reliability = Reliability.fromId((flags & 0b11100000) >> 5)
         split = (flags & 0b00010000) != 0
@@ -54,7 +54,7 @@ public class EncapsulatedPacket {
         buffer = buf.readSlice(length: Int(size))!
     }
     
-    public func encode(_ buf : inout ByteBuffer) {
+    func encode(_ buf : inout ByteBuffer) {
         var flags = reliability!.id << Int32(5)
         
         if (split) {

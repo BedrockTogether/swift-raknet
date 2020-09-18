@@ -11,7 +11,7 @@ import NIO
 
 public protocol ConnectionListener {
     
-    func onEncapsulated(_ packet : EncapsulatedPacket, _ address : SocketAddress)
+    func onEncapsulated(_ buf : ByteBuffer, _ address : SocketAddress)
     
     func onCloseConnection(_ address : SocketAddress, _ reason : String)
     

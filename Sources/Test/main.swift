@@ -10,7 +10,7 @@ import RakNetSwift
 import NIO
 
 class MyListener : ConnectionListener {
-    func onEncapsulated(_ packet: EncapsulatedPacket, _ address: SocketAddress) {
+    func onEncapsulated(_ buf: ByteBuffer, _ address: SocketAddress) {
         //NOOP
     }
     
