@@ -64,7 +64,7 @@ public class Listener {
             return nil
         }
         
-        print("Server started and listening on \(channel!.localAddress!)")
+        //print("Server started and listening on \(channel!.localAddress!)")
         self.tick()
 
         return channel!.closeFuture
