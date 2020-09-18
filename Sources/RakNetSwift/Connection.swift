@@ -411,7 +411,7 @@ public class Connection {
                 pk.buffer = buffers[i]
                 if (buffers.count > 0) {
                     self.messageIndex += 1
-                    pk.messageIndex! = self.messageIndex
+                    pk.messageIndex = self.messageIndex
                 } else {
                     pk.messageIndex = packet.messageIndex
                 }
