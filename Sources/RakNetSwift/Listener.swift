@@ -33,6 +33,12 @@ public class Listener {
     
     var connectionListener : ConnectionListener?
     
+    public var allocator : ByteBufferAllocator {
+        get {
+            return self.channel!.allocator
+        }
+    }
+    
     public init(){
         
     }
