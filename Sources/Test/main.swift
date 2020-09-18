@@ -28,7 +28,7 @@ class MyListener : ConnectionListener {
 do {
     let listener = Listener()
     let info = ServerInfo("RakNetSwift Test", "RakNetSwift", 409, "1.16.40", 0, 5, "Creative", 0)
-    var connectionListener = MyListener()
+    let connectionListener = MyListener()
     try listener.listen(connectionListener /*yourListener*/, info)!.wait()
 } catch {
     //ignore
