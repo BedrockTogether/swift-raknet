@@ -75,7 +75,6 @@ public class Listener {
             for con in self.connections {
                 self.removeConnection(con.value, "shutdown")
             }
-            channel!.close()
             try group.syncShutdownGracefully()
         } catch {
             
@@ -85,17 +84,7 @@ public class Listener {
     }
     
     public func close(){
-        do {
-            for con in self.connections {
-                self.removeConnection(con.value, "shutdown")
-            }
-            channel!.close()
-            try group.syncShutdownGracefully()
-        } catch {
-            
-            // error
-            return
-        }
+        channel!.close()
     }
     
     func tick() {
