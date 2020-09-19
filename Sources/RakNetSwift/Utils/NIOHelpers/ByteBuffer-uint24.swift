@@ -14,9 +14,9 @@ extension ByteBuffer {
     @discardableResult
     @inlinable
     public mutating func writeUInt24(_ value : UInt32) -> Int{
-        self.writeInteger(UInt8(exactly: value)!)
-        self.writeInteger(UInt8(exactly: value >> 8)!)
-        self.writeInteger(UInt8(exactly: value >> 16)!)
+        self.writeInteger(UInt8(truncatingIfNeeded: value)!)
+        self.writeInteger(UInt8(truncatingIfNeeded: value >> 8)!)
+        self.writeInteger(UInt8(truncatingIfNeeded: value >> 16)!)
         return Int(3)
     }
     
