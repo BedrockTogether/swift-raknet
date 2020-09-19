@@ -116,13 +116,18 @@ public class Listener {
     }
     
     public func removeConnection(_ connection : Connection, _ reason : String) {
-        self.channel!.eventLoop.next().scheduleTask(in: TimeAmount.milliseconds(0), { () in
-            let addr = connection.address
-            if (self.connections[addr!] != nil) {
-                connection.close()
-                self.connections[addr!] = nil
-            }
-        })
+//        self.channel!.eventLoop.next().scheduleTask(in: TimeAmount.milliseconds(0), { () in
+//            let addr = connection.address
+//            if (self.connections[addr!] != nil) {
+//                connection.close()
+//                self.connections[addr!] = nil
+//            }
+//        })
+        let addr = connection.address
+        if (self.connections[addr!] != nil) {
+            connection.close()
+            self.connections[addr!] = nil
+        }
         self.connectionListener!.onCloseConnection(connection.address!, reason)
     }
     
