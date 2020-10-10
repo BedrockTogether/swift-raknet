@@ -127,7 +127,6 @@ public class Listener {
     }
     
     public func sendBuffer(_ buffer : inout ByteBuffer, _ address : SocketAddress) {
-        self.printer.print("Send buffer to \(address)")
         self.channel!.writeAndFlush(AddressedEnvelope(remoteAddress: address, data: buffer))
     }
     
