@@ -17,6 +17,12 @@ let RAKNET_TPS = 100
 let RAKNET_TICK_LENGTH = 1.0 / Double(RAKNET_TPS)
 
 public class Listener {
+    struct StandardOutput : Printer {
+        func print(_ msg: String) {
+            Swift.print(msg)
+        }
+    }
+    
     let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
     
     var id = Int64(arc4random()) &+ (Int64(arc4random()) << 32)
@@ -32,6 +38,8 @@ public class Listener {
     var bootstrap : DatagramBootstrap?
     
     var connectionListener : ConnectionListener?
+    
+    public var printer : Printer = StandardOutput()
     
     private var timer: DispatchSourceTimer?
     
@@ -96,6 +104,7 @@ public class Listener {
         timer!.setEventHandler { [weak self] in
             do {
                 try self!.channel!.eventLoop.next().submit {
+                    self?.printer.print("Tick")
                     if(!self!.shutdown) {
                         for con in self!.connections {
                             con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
@@ -119,6 +128,7 @@ public class Listener {
     }
     
     public func sendBuffer(_ buffer : inout ByteBuffer, _ address : SocketAddress) {
+        self.printer.print("Send buffer to \(address)")
         self.channel!.writeAndFlush(AddressedEnvelope(remoteAddress: address, data: buffer))
     }
     
