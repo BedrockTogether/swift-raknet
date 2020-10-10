@@ -33,7 +33,7 @@ public class Listener {
     
     var connectionListener : ConnectionListener?
     
-    var updateTask : RepeatedTask?
+    private var timer: DispatchSourceTimer?
     
     public var allocator : ByteBufferAllocator {
         get {
@@ -56,7 +56,7 @@ public class Listener {
             .channelInitializer { channel in
                 // Ensure we don't read faster than we can write by adding the BackPressureHandler into the pipeline.
                 channel.pipeline.addHandler(handler)
-        }
+            }
         
         do {
             channel = try bootstrap!.bind(host: host, port: port).wait()
@@ -68,7 +68,7 @@ public class Listener {
         
         //print("Server started and listening on \(channel!.localAddress!)")
         self.tick()
-
+        
         return channel!.closeFuture
     }
     
@@ -90,16 +90,32 @@ public class Listener {
     }
     
     func tick() {
-        updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
-            repeatedTask in
-            if(!self.shutdown) {
-                for con in self.connections {
-                    con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
-                }
-            } else {
-                repeatedTask.cancel()
+        let queue = DispatchQueue(label: Bundle.main.bundleIdentifier! + ".timer")
+        timer = DispatchSource.makeTimerSource(queue: queue)
+        timer!.schedule(deadline: .now(), repeating: .seconds(1))
+        timer!.setEventHandler { [weak self] in
+            do {
+                try self!.channel!.eventLoop.next().submit {
+                    if(!self!.shutdown) {
+                        for con in self!.connections {
+                            con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
+                        }
+                    } else {
+                        self!.timer?.cancel()
+                        self!.timer = nil
+                    }
+                }.wait()
+            } catch {
+                fatalError("\(error.localizedDescription)")
             }
-        })
+
+        }
+        timer!.resume()
+        
+        //        updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
+        //            repeatedTask in
+        //
+        //        })
     }
     
     public func sendBuffer(_ buffer : inout ByteBuffer, _ address : SocketAddress) {
@@ -205,7 +221,7 @@ public class Listener {
                     var buffer = context.channel.allocator.buffer(capacity: 31)
                     pk.serverId = listener!.id
                     pk.socketAddress = packet.remoteAddress
-   
+                    
                     let mtu = decodePk.mtu < 576 ? 576 : (decodePk.mtu > 1400 ? 1400 : decodePk.mtu)
                     let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
                     pk.mtu = adjustedMtu
