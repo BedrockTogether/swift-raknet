@@ -92,7 +92,7 @@ public class Listener {
     func tick() {
         let queue = DispatchQueue(label: Bundle.main.bundleIdentifier! + ".timer")
         timer = DispatchSource.makeTimerSource(queue: queue)
-        timer!.schedule(deadline: .now(), repeating: .seconds(1))
+        timer!.schedule(deadline: .now(), repeating: .milliseconds(Int(RAKNET_TICK_LENGTH * 1000)))
         timer!.setEventHandler { [weak self] in
             do {
                 try self!.channel!.eventLoop.next().submit {
