@@ -74,7 +74,7 @@ public class Listener {
             fatalError(error.localizedDescription)
         }
         
-        //print("Server started and listening on \(channel!.localAddress!)")
+        self.listener!.printer.print(("Server started and listening on \(channel!.localAddress!)")
         self.tick()
         
         return channel!.closeFuture
