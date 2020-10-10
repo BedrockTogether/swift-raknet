@@ -141,7 +141,7 @@ public class Connection {
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
         let datagram = (header & Flags.FLAG_VALID) != 0
-        print("id: \(header)")
+        //print("id: \(header)")
         if datagram {
             if (header & Flags.FLAG_ACK) != 0 {
                 //print("ack")
@@ -324,7 +324,7 @@ public class Connection {
         }
         
         let id = packet.buffer!.readInteger(as: UInt8.self)!
-        print("packet: \(id)")
+        //print("packet: \(id)")
         packet.buffer!.moveReaderIndex(to: 0)
         if(id < 0x80) {
             if(self.state == State.CONNECTING) {
