@@ -33,6 +33,8 @@ public class Listener {
     
     var connectionListener : ConnectionListener?
     
+    var updateTask : RepeatedTask?
+    
     public var allocator : ByteBufferAllocator {
         get {
             return self.channel!.allocator
@@ -88,7 +90,7 @@ public class Listener {
     }
     
     func tick() {
-        _ = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
+        updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
             repeatedTask in
             if(!self.shutdown) {
                 for con in self.connections {
