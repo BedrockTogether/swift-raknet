@@ -58,10 +58,10 @@ public class Listener {
         
         do {
             channel = try bootstrap!.bind(host: host, port: port).wait()
-        } catch NIO.SocketAddressError.unknown(host: _, port: _) {
-            return nil
+        } catch NIO.SocketAddressError.unknown(host: host, port: port) {
+            fatalError("\(host) \(port)")
         } catch {
-            return nil
+            fatalError(error.localizedDescription)
         }
         
         //print("Server started and listening on \(channel!.localAddress!)")
@@ -77,9 +77,8 @@ public class Listener {
             }
             try group.syncShutdownGracefully()
         } catch {
-            
+            fatalError(error.localizedDescription)
             // error
-            return
         }
     }
     
@@ -225,7 +224,7 @@ public class Listener {
         
         
         public func errorCaught(context: ChannelHandlerContext, error: Error) {
-            print("An exception occurred in RakNet", error)
+            fatalError("An exception occurred in RakNet \(error.localizedDescription)")
         }
         
     }
