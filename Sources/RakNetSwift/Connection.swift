@@ -214,6 +214,7 @@ public class Connection {
             for i in seq.start...seq.end {
                 if self.sendDatagrams[Int32(i)] != nil {
                     self.outgoingPacket = self.sendDatagrams[Int32(i)]!
+                    self.listener!.printer.print("Nack");
                     self.sendQueue()
                     //self.outgoingPackets.append(packet)
                     self.sendDatagrams[Int32(i)] = nil

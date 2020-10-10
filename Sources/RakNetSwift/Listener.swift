@@ -104,7 +104,6 @@ public class Listener {
         timer!.setEventHandler { [weak self] in
             do {
                 try self!.channel!.eventLoop.next().submit {
-                    self?.printer.print("Tick")
                     if(!self!.shutdown) {
                         for con in self!.connections {
                             con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
