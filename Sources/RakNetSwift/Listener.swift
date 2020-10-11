@@ -61,9 +61,9 @@ public class Listener {
                 channel.pipeline.addHandler(ServerDatagramHandler(self))
             }
         
-        defer {
-            try! group.syncShutdownGracefully()
-        }
+//        defer {
+//            try! group.syncShutdownGracefully()
+//        }
         
         do {
             channel = try bootstrap.bind(host: host, port: port).wait()
