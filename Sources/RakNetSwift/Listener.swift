@@ -50,7 +50,7 @@ public class Listener {
     }
     
     public func listen<T : ConnectionListener>(_ connectionListener : T?, _ serverInfo : ServerInfo, _ host : String = "0.0.0.0", _ port : Int = 19132) -> EventLoopFuture<Void>? {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 2)
         self.info = serverInfo
         self.connectionListener = connectionListener
         var bootstrap = DatagramBootstrap(group: group).channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
@@ -121,9 +121,13 @@ public class Listener {
         //        }
         //        timer!.resume()
         
+        self.printer.print(channel!.eventLoop.description)
+
+        
         updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
             repeatedTask in
             if(!self.shutdown) {
+                self.printer.print("Tick")
                 for con in self.connections {
                     con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
                 }
