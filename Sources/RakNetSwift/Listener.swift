@@ -32,9 +32,7 @@ public class Listener {
     public var connections = [SocketAddress : Connection]()
     
     var shutdown = false
-    
-    var bootstrap : DatagramBootstrap?
-    
+        
     var connectionListener : ConnectionListener?
     
     public var printer : Printer = StandardOutput()
@@ -55,7 +53,7 @@ public class Listener {
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         self.info = serverInfo
         self.connectionListener = connectionListener
-        bootstrap = DatagramBootstrap(group: group).channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+        var bootstrap = DatagramBootstrap(group: group).channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             
             // Set the handlers that are applied to the bound channel
             .channelInitializer { channel in
@@ -68,7 +66,7 @@ public class Listener {
         }
         
         do {
-            channel = try bootstrap!.bind(host: host, port: port).wait()
+            channel = try bootstrap.bind(host: host, port: port).wait()
         } catch NIO.SocketAddressError.unknown(host: host, port: port) {
             self.printer.print("unavaliable: \(host) \(port)")
             return nil
@@ -93,7 +91,11 @@ public class Listener {
     
     public func close(){
         self.shutdown = true
-        channel!.close()
+        do {
+            try channel!.close().wait()
+        } catch {
+            self.printer.print(error.localizedDescription)
+        }
     }
     
     func tick() {
