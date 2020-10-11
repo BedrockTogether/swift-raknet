@@ -428,14 +428,14 @@ public class Connection {
     
     public func sendDataPacket(_ buf : inout ByteBuffer){
         let packet = EncapsulatedPacket()
-        packet.reliability = Reliability.UNRELIABLE
+        packet.reliability = Reliability.RELIABLE_ORDERED
         packet.buffer = buf
         self.addEncapsulatedToQueue(packet)
     }
     
     public func sendDataPacketImmediately(_ buf : inout ByteBuffer){
         let packet = EncapsulatedPacket()
-        packet.reliability = Reliability.UNRELIABLE
+        packet.reliability = Reliability.RELIABLE_ORDERED
         packet.buffer = buf
         self.addEncapsulatedToQueue(packet, Priority.IMMEDIATE)
     }
