@@ -71,9 +71,11 @@ public class Listener {
         do {
             channel = try bootstrap!.bind(host: host, port: port).wait()
         } catch NIO.SocketAddressError.unknown(host: host, port: port) {
-            fatalError("\(host) \(port)")
+            self.printer.print("unavaliable: \(host) \(port)")
+            return nil
         } catch {
-            fatalError(error.localizedDescription)
+            self.printer.print(error.localizedDescription)
+            return nil
         }
         
         self.printer.print("Server started and listening on \(channel!.localAddress!)")
@@ -84,12 +86,13 @@ public class Listener {
     
     deinit {
         do {
+            self.printer.print("Deinit")
             for con in self.connections {
                 self.removeConnection(con.value, "shutdown")
             }
             try group.syncShutdownGracefully()
         } catch {
-            fatalError(error.localizedDescription)
+            self.printer.print(error.localizedDescription)
             // error
         }
     }
@@ -183,6 +186,9 @@ public class Listener {
                     connection!.recieve(&content)
                     return
                 }
+                
+                self.listener!.printer.print("Unconnected: \(packetId)")
+
                 // These packets don't require a session
                 switch(packetId) {
                 case PacketIdentifiers.UnconnectedPing:
