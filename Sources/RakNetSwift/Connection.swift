@@ -382,7 +382,7 @@ public class Connection {
         if (packet.reliability!.id >= 2)
         {
             self.messageIndex += 1
-            packet.messageIndex! = self.messageIndex
+            packet.messageIndex = self.messageIndex
 
             if (packet.reliability! == Reliability.RELIABLE_ORDERED) {
                 packet.orderIndex = self.channelIndex[Int(packet.orderChannel)]
