@@ -49,8 +49,7 @@ public class Listener {
         
     }
     
-    public func listen<T : ConnectionListener>(_ connectionListener : T?, _ serverInfo : ServerInfo, _ host : String = "0.0.0.0", _ port : Int = 19132) -> EventLoopFuture<Void>? {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    public func listen<T : ConnectionListener>(_ connectionListener : T?, _ serverInfo : ServerInfo, _ host : String = "0.0.0.0", _ port : Int = 19132, _ group : EventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)) -> EventLoopFuture<Void>? {
         self.info = serverInfo
         self.connectionListener = connectionListener
         var bootstrap = DatagramBootstrap(group: group).channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
@@ -60,10 +59,6 @@ public class Listener {
                 // Ensure we don't read faster than we can write by adding the BackPressureHandler into the pipeline.
                 channel.pipeline.addHandler(ServerDatagramHandler(self), position: .last)
             }
-        
-//        defer {
-//            try! group.syncShutdownGracefully()
-//        }
         
         do {
             channel = try bootstrap.bind(host: host, port: port).wait()
@@ -121,17 +116,17 @@ public class Listener {
         //        }
         //        timer!.resume()
                 
-//        updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
-//            repeatedTask in
-//            if(!self.shutdown) {
-//                self.printer.print("Tick")
-//                for con in self.connections {
-//                    con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
-//                }
-//            } else {
-//                repeatedTask.cancel()
-//            }
-//        })
+        updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
+            repeatedTask in
+            if(!self.shutdown) {
+                self.printer.print("Tick")
+                for con in self.connections {
+                    con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
+                }
+            } else {
+                repeatedTask.cancel()
+            }
+        })
     }
     
     public func sendBuffer(_ buffer : inout ByteBuffer, _ address : SocketAddress) {
@@ -159,7 +154,7 @@ public class Listener {
     }
     
     
-    public class ServerDatagramHandler : ChannelInboundHandler {
+    public final class ServerDatagramHandler : ChannelInboundHandler {
         public typealias InboundIn = AddressedEnvelope<ByteBuffer>
         public typealias OutboundOut = AddressedEnvelope<ByteBuffer>
         public var listener : Listener?
