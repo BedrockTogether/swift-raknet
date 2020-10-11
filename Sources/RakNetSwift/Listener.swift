@@ -168,6 +168,7 @@ public class Listener {
         }
         
         public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+            self.listener!.printer.print("Data \(data)")
             let packet = self.unwrapInboundIn(data)
             var content = packet.data
             if (content.readableBytes <= 0) {
@@ -259,6 +260,10 @@ public class Listener {
             // As we are not really interested getting notified on success or failure we just pass nil as promise to
             // reduce allocations.
             context.flush()
+        }
+        
+        public func channelRegistered(context: ChannelHandlerContext) {
+            self.listener!.printer.print("Channel registered!")
         }
         
         
