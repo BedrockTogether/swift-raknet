@@ -41,9 +41,9 @@ public class Listener {
     
     public var printer : Printer = StandardOutput()
     
-//    private var timer: DispatchSourceTimer?
+    private var timer: DispatchSourceTimer?
     
-    var updateTask : RepeatedTask?
+    //    var updateTask : RepeatedTask?
     
     public var allocator : ByteBufferAllocator {
         get {
@@ -103,38 +103,38 @@ public class Listener {
     }
     
     func tick() {
-        //        let queue = DispatchQueue(label: Bundle.main.bundleIdentifier! + ".timer")
-        //        timer = DispatchSource.makeTimerSource(queue: queue)
-        //        timer!.schedule(deadline: .now(), repeating: .milliseconds(Int(RAKNET_TICK_LENGTH * 1000)))
-        //        timer!.setEventHandler { [weak self] in
-        //            do {
-        //                try self!.channel!.eventLoop.next().submit {
-        //                    if(!self!.shutdown) {
-        //                        for con in self!.connections {
-        //                            con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
-        //                        }
-        //                    } else {
-        //                        self!.timer?.cancel()
-        //                        self!.timer = nil
-        //                    }
-        //                }.wait()
-        //            } catch {
-        //                fatalError("\(error.localizedDescription)")
-        //            }
-        //
-        //        }
-        //        timer!.resume()
-        
-        updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
-            repeatedTask in
-            if(!self.shutdown) {
-                for con in self.connections {
-                    con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
-                }
-            } else {
-                repeatedTask.cancel()
+        let queue = DispatchQueue(label: Bundle.main.bundleIdentifier! + ".timer")
+        timer = DispatchSource.makeTimerSource(queue: queue)
+        timer!.schedule(deadline: .now(), repeating: .milliseconds(Int(RAKNET_TICK_LENGTH * 1000)))
+        timer!.setEventHandler { [weak self] in
+            do {
+                try self!.channel!.eventLoop.next().submit {
+                    if(!self!.shutdown) {
+                        for con in self!.connections {
+                            con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
+                        }
+                    } else {
+                        self!.timer?.cancel()
+                        self!.timer = nil
+                    }
+                }.wait()
+            } catch {
+                self!.printer.print("\(error.localizedDescription)")
             }
-        })
+            
+        }
+        timer!.resume()
+        
+        //        updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
+        //            repeatedTask in
+        //            if(!self.shutdown) {
+        //                for con in self.connections {
+        //                    con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
+        //                }
+        //            } else {
+        //                repeatedTask.cancel()
+        //            }
+        //        })
     }
     
     public func sendBuffer(_ buffer : inout ByteBuffer, _ address : SocketAddress) {
@@ -188,7 +188,7 @@ public class Listener {
                 }
                 
                 self.listener!.printer.print("Unconnected: \(packetId)")
-
+                
                 // These packets don't require a session
                 switch(packetId) {
                 case PacketIdentifiers.UnconnectedPing:
@@ -265,7 +265,7 @@ public class Listener {
         
         
         public func errorCaught(context: ChannelHandlerContext, error: Error) {
-            fatalError("An exception occurred in RakNet \(error.localizedDescription)")
+            self.listener!.printer.print("An exception occurred in RakNet \(error.localizedDescription)")
         }
         
     }
