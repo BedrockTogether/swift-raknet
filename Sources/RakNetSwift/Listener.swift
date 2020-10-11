@@ -267,6 +267,13 @@ public class Listener {
             self.listener!.printer.print("Channel registered!")
         }
         
+        public func channelActive(context: ChannelHandlerContext) {
+            self.listener!.printer.print("Channel active!")
+        }
+        
+        public func channelInactive(context: ChannelHandlerContext) {
+            self.listener!.printer.print("Channel inactive!")
+        }
         
         public func errorCaught(context: ChannelHandlerContext, error: Error) {
             self.listener!.printer.print("An exception occurred in RakNet \(error.localizedDescription)")
