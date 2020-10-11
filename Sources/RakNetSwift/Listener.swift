@@ -41,7 +41,9 @@ public class Listener {
     
     public var printer : Printer = StandardOutput()
     
-    private var timer: DispatchSourceTimer?
+//    private var timer: DispatchSourceTimer?
+    
+    var updateTask : RepeatedTask?
     
     public var allocator : ByteBufferAllocator {
         get {
@@ -98,32 +100,38 @@ public class Listener {
     }
     
     func tick() {
-        let queue = DispatchQueue(label: Bundle.main.bundleIdentifier! + ".timer")
-        timer = DispatchSource.makeTimerSource(queue: queue)
-        timer!.schedule(deadline: .now(), repeating: .milliseconds(Int(RAKNET_TICK_LENGTH * 1000)))
-        timer!.setEventHandler { [weak self] in
-            do {
-                try self!.channel!.eventLoop.next().submit {
-                    if(!self!.shutdown) {
-                        for con in self!.connections {
-                            con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
-                        }
-                    } else {
-                        self!.timer?.cancel()
-                        self!.timer = nil
-                    }
-                }.wait()
-            } catch {
-                fatalError("\(error.localizedDescription)")
-            }
-
-        }
-        timer!.resume()
-        
-        //        updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
-        //            repeatedTask in
+        //        let queue = DispatchQueue(label: Bundle.main.bundleIdentifier! + ".timer")
+        //        timer = DispatchSource.makeTimerSource(queue: queue)
+        //        timer!.schedule(deadline: .now(), repeating: .milliseconds(Int(RAKNET_TICK_LENGTH * 1000)))
+        //        timer!.setEventHandler { [weak self] in
+        //            do {
+        //                try self!.channel!.eventLoop.next().submit {
+        //                    if(!self!.shutdown) {
+        //                        for con in self!.connections {
+        //                            con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
+        //                        }
+        //                    } else {
+        //                        self!.timer?.cancel()
+        //                        self!.timer = nil
+        //                    }
+        //                }.wait()
+        //            } catch {
+        //                fatalError("\(error.localizedDescription)")
+        //            }
         //
-        //        })
+        //        }
+        //        timer!.resume()
+        
+        updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
+            repeatedTask in
+            if(!self.shutdown) {
+                for con in self.connections {
+                    con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
+                }
+            } else {
+                repeatedTask.cancel()
+            }
+        })
     }
     
     public func sendBuffer(_ buffer : inout ByteBuffer, _ address : SocketAddress) {
@@ -132,13 +140,13 @@ public class Listener {
     
     public func removeConnection(_ connection : Connection, _ reason : String) {
         if !shutdown {
-            self.channel!.eventLoop.next().scheduleTask(in: TimeAmount.milliseconds(0), { () in
+            self.channel!.eventLoop.next().submit {
                 let addr = connection.address
                 if (self.connections[addr!] != nil) {
                     connection.close()
                     self.connections[addr!] = nil
                 }
-            })
+            }
         } else {
             let addr = connection.address
             if (self.connections[addr!] != nil) {
