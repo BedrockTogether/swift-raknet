@@ -63,22 +63,22 @@ public class Listener {
         do {
             channel = try bootstrap.bind(host: host, port: port).wait()
         } catch NIO.SocketAddressError.unknown(host: host, port: port) {
-            self.printer.print("unavaliable: \(host) \(port)")
+            //self.printer.print("unavaliable: \(host) \(port)")
             return nil
         } catch {
-            self.printer.print(error.localizedDescription)
+            //self.printer.print(error.localizedDescription)
             return nil
         }
         
         self.tick()
         
-        self.printer.print("Server started and listening on \(channel!.localAddress!)")
+        //self.printer.print("Server started and listening on \(channel!.localAddress!)")
         
         return channel!.closeFuture
     }
     
     deinit {
-        self.printer.print("Deinit")
+        //self.printer.print("Deinit")
         for con in self.connections {
             self.removeConnection(con.value, "shutdown")
         }
@@ -89,7 +89,7 @@ public class Listener {
         do {
             try channel!.close().wait()
         } catch {
-            self.printer.print(error.localizedDescription)
+            //self.printer.print(error.localizedDescription)
         }
     }
     
@@ -119,7 +119,7 @@ public class Listener {
         updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
             repeatedTask in
             if(!self.shutdown) {
-                self.printer.print("Tick")
+                //self.printer.print("Tick")
                 for con in self.connections {
                     con.value.update(Int64(NSDate().timeIntervalSince1970 * 1000))
                 }
@@ -138,7 +138,7 @@ public class Listener {
             self.channel!.eventLoop.next().submit {
                 let addr = connection.address
                 if (self.connections[addr!] != nil) {
-                    self.printer.print("Removed: \(addr!)")
+                    //self.printer.print("Removed: \(addr!)")
                     connection.close()
                     self.connections[addr!] = nil
                 }
@@ -164,11 +164,11 @@ public class Listener {
         }
         
         public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-            self.listener!.printer.print("Data \(data)")
+            //self.listener!.printer.print("Data \(data)")
             let packet = self.unwrapInboundIn(data)
             var content = packet.data
             if (content.readableBytes <= 0) {
-                self.listener!.printer.print("No data \(packet.remoteAddress)")
+                //self.listener!.printer.print("No data \(packet.remoteAddress)")
                 // We have no use for empty packets.
                 return;
             }
@@ -181,7 +181,7 @@ public class Listener {
                 return
             }
             
-            self.listener!.printer.print("Unconnected: \(packetId)")
+            //self.listener!.printer.print("Unconnected: \(packetId)")
             
             // These packets don't require a session
             switch(packetId) {
@@ -259,19 +259,19 @@ public class Listener {
         }
         
         public func channelRegistered(context: ChannelHandlerContext) {
-            self.listener!.printer.print("Channel registered!")
+            //self.listener!.printer.print("Channel registered!")
         }
         
         public func channelActive(context: ChannelHandlerContext) {
-            self.listener!.printer.print("Channel active!")
+            //self.listener!.printer.print("Channel active!")
         }
         
         public func channelInactive(context: ChannelHandlerContext) {
-            self.listener!.printer.print("Channel inactive!")
+            //self.listener!.printer.print("Channel inactive!")
         }
         
         public func errorCaught(context: ChannelHandlerContext, error: Error) {
-            self.listener!.printer.print("An exception occurred in RakNet \(error.localizedDescription)")
+            //self.listener!.printer.print("An exception occurred in RakNet \(error.localizedDescription)")
             context.close(promise: nil)
         }
         
