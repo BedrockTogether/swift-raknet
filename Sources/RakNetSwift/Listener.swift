@@ -63,10 +63,10 @@ public class Listener {
         do {
             channel = try bootstrap.bind(host: host, port: port).wait()
         } catch NIO.SocketAddressError.unknown(host: host, port: port) {
-            //self.printer.print("unavaliable: \(host) \(port)")
+            self.printer.print("unavaliable: \(host) \(port)")
             return nil
         } catch {
-            //self.printer.print(error.localizedDescription)
+            self.printer.print(error.localizedDescription)
             return nil
         }
         
@@ -87,9 +87,9 @@ public class Listener {
     public func close(){
         self.shutdown = true
         do {
-            try channel!.close().wait()
+            try channel!.close()
         } catch {
-            //self.printer.print(error.localizedDescription)
+            self.printer.print(error.localizedDescription)
         }
     }
     
@@ -252,11 +252,11 @@ public class Listener {
             }
         }
         
-        public func channelReadComplete(context: ChannelHandlerContext) {
-            // As we are not really interested getting notified on success or failure we just pass nil as promise to
-            // reduce allocations.
-            context.flush()
-        }
+//        public func channelReadComplete(context: ChannelHandlerContext) {
+//            // As we are not really interested getting notified on success or failure we just pass nil as promise to
+//            // reduce allocations.
+//            context.flush()
+//        }
         
         public func channelRegistered(context: ChannelHandlerContext) {
             //self.listener!.printer.print("Channel registered!")
@@ -271,7 +271,7 @@ public class Listener {
         }
         
         public func errorCaught(context: ChannelHandlerContext, error: Error) {
-            //self.listener!.printer.print("An exception occurred in RakNet \(error.localizedDescription)")
+            self.listener!.printer.print("An exception occurred in RakNet \(error.localizedDescription)")
             context.close(promise: nil)
         }
         
