@@ -538,6 +538,6 @@ public class Connection {
         var buf = self.listener!.channel!.allocator.buffer(bytes: [0x00, 0x00, 0x08, 0x15])
         let pk = EncapsulatedPacket()
         pk.decode(&buf)
-        self.addEncapsulatedToQueue(pk)
+        self.addEncapsulatedToQueue(pk, .IMMEDIATE)
     }
 }

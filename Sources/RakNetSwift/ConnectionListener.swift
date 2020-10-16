@@ -16,5 +16,5 @@ public protocol ConnectionListener {
     func onCloseConnection(_ address : SocketAddress, _ reason : String)
     
     func onOpenConnection(_ con : Connection)
-    
+
 }
