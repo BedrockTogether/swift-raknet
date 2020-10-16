@@ -463,6 +463,12 @@ public class Connection {
             let pk = Datagram()
             pk.sequenceNumber = UInt32(self.sendSequenceNumber)
             self.sendSequenceNumber += 1
+            
+            if packet.reliability!.id >= 2{
+                self.messageIndex += 1
+                packet.messageIndex = self.messageIndex
+            }
+            
             pk.packets.append(packet)
             if (packet.needACK) {
                 packet.needACK = false
