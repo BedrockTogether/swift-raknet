@@ -51,7 +51,7 @@ public class Connection {
     
     var lastUpdate : Int64 = Int64(NSDate().timeIntervalSince1970 * 1000)
         
-    var isActive = false
+    var lastPing : Int64 = Int64(NSDate().timeIntervalSince1970 * 1000)
     
     init(_ listener : Listener, _ mtu : Int32, _ address : SocketAddress){
         self.listener = listener
@@ -66,12 +66,14 @@ public class Connection {
     }
     
     func update(_ timestamp : Int64 ) {
-        if(!self.isActive && (self.lastUpdate + 10000) < timestamp){
+        if(timestamp - self.lastUpdate >= 10000){
             self.disconnect("timeout")
             return
         }
         
-        self.isActive = false
+        if self.lastPing + 2000 < timestamp {
+            self.connectedPing(timestamp)
+        }
         
         if(self.ackQueue.count > 0){
             let pk = ACK(&self.ackQueue, Int32(self.mtu - 5))
@@ -136,7 +138,6 @@ public class Connection {
     }
     
     func recieve(_ buf : inout ByteBuffer){
-        self.isActive = true
         self.lastUpdate = Int64(NSDate().timeIntervalSince1970 * 1000)
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
@@ -169,7 +170,7 @@ public class Connection {
                         accept.encode(&buf)
                         
                         let sendPk = EncapsulatedPacket()
-                        sendPk.reliability = Reliability.UNRELIABLE
+                        sendPk.reliability = Reliability.RELIABLE
                         sendPk.buffer = buf
                         self.addToQueue(sendPk, Priority.IMMEDIATE)
                     } else if(header == PacketIdentifiers.NewIncomingConnection) {
@@ -338,7 +339,7 @@ public class Connection {
                     
                     accept.encode(&buf)
                     let sendPk = EncapsulatedPacket()
-                    sendPk.reliability = Reliability.UNRELIABLE
+                    sendPk.reliability = Reliability.RELIABLE
                     sendPk.buffer = buf
                     self.addToQueue(sendPk, Priority.IMMEDIATE)
                 } else if(id == PacketIdentifiers.NewIncomingConnection) {
@@ -363,7 +364,7 @@ public class Connection {
                 pong.encode(&buf)
                 
                 let sendPk = EncapsulatedPacket()
-                sendPk.reliability = Reliability.UNRELIABLE
+                sendPk.reliability = Reliability.RELIABLE
                 sendPk.buffer = buf
                 self.addToQueue(sendPk, Priority.IMMEDIATE)
             }
@@ -438,6 +439,18 @@ public class Connection {
         packet.reliability = Reliability.RELIABLE_ORDERED
         packet.buffer = buf
         self.addEncapsulatedToQueue(packet, Priority.IMMEDIATE)
+    }
+    
+    func connectedPing(_ pingTime : Int64) {
+        let ping = ConnectedPing(pingTime)
+        var buf = self.listener!.channel!.allocator.buffer(capacity: 9)
+        ping.encode(&buf)
+        
+        let sendPk = EncapsulatedPacket()
+        sendPk.reliability = Reliability.RELIABLE
+        sendPk.buffer = buf
+        self.addToQueue(sendPk, Priority.IMMEDIATE)
+        self.lastPing = pingTime
     }
     
     func addToQueue(_ packet : EncapsulatedPacket, _ flags : Priority = .NORMAL) {
