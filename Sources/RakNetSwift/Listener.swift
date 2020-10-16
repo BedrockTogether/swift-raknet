@@ -86,10 +86,8 @@ public class Listener {
     
     public func close(){
         self.shutdown = true
-        do {
-            try channel!.close()
-        } catch {
-            self.printer.print(error.localizedDescription)
+        if channel != nil {
+            channel!.close()
         }
     }
     
