@@ -138,7 +138,6 @@ public class Connection {
     }
     
     func recieve(_ buf : inout ByteBuffer){
-        self.lastUpdate = Int64(NSDate().timeIntervalSince1970 * 1000)
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
         let datagram = (header & Flags.FLAG_VALID) != 0
@@ -225,6 +224,7 @@ public class Connection {
     }
     
     func handleDatagram(_ buf : inout ByteBuffer){
+        self.lastUpdate = Int64(NSDate().timeIntervalSince1970 * 1000)
         let packet = Datagram()
         packet.decode(&buf)
         if(packet.sequenceNumber < self.windowStart || packet.sequenceNumber > self.windowEnd || self.recievedWindow.contains(Int32(packet.sequenceNumber))) {
