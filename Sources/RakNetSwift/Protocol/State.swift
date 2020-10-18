@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum State : Int {
+enum State : Int {
     case CONNECTING
     case CONNECTED
     case DISCONNECTING
