@@ -428,17 +428,23 @@ public class Connection {
     }
     
     public func sendDataPacket(_ buf : inout ByteBuffer){
-        let packet = EncapsulatedPacket()
-        packet.reliability = Reliability.RELIABLE_ORDERED
-        packet.buffer = buf
-        self.addEncapsulatedToQueue(packet)
+        let buffer = buf
+        self.listener!.group!.next().submit {
+            let packet = EncapsulatedPacket()
+            packet.reliability = Reliability.RELIABLE_ORDERED
+            packet.buffer = buffer
+            self.addEncapsulatedToQueue(packet)
+        }
     }
     
     public func sendDataPacketImmediately(_ buf : inout ByteBuffer){
-        let packet = EncapsulatedPacket()
-        packet.reliability = Reliability.RELIABLE_ORDERED
-        packet.buffer = buf
-        self.addEncapsulatedToQueue(packet, Priority.IMMEDIATE)
+        let buffer = buf
+        self.listener!.group!.next().submit {
+            let packet = EncapsulatedPacket()
+            packet.reliability = Reliability.RELIABLE_ORDERED
+            packet.buffer = buf
+            self.addEncapsulatedToQueue(packet, Priority.IMMEDIATE)
+        }
     }
     
     func connectedPing(_ pingTime : Int64) {

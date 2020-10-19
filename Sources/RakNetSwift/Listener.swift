@@ -39,6 +39,8 @@ public class Listener {
     
     var updateTask : RepeatedTask?
     
+    var group : EventLoopGroup?
+    
     public var allocator : ByteBufferAllocator {
         get {
             return self.channel!.allocator
@@ -52,6 +54,7 @@ public class Listener {
     public func listen<T : ConnectionListener>(_ connectionListener : T?, _ serverInfo : ServerInfo, _ host : String = "0.0.0.0", _ port : Int = 19132, _ group : EventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)) -> EventLoopFuture<Void>? {
         self.info = serverInfo
         self.connectionListener = connectionListener
+        self.group = group
         var bootstrap = DatagramBootstrap(group: group).channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             
             // Set the handlers that are applied to the bound channel
