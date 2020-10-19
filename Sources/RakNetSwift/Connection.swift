@@ -130,7 +130,7 @@ public class Connection {
                 self.recievedWindow.dropFirst()
                 size -= 1
             } else {
-                break
+                size = 0
             }
         }
         
