@@ -165,11 +165,11 @@ public class Listener {
         }
         
         public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-            self.listener!.printer.print("Data \(data)")
+            //self.listener!.printer.print("Data \(data)")
             let packet = self.unwrapInboundIn(data)
             var content = packet.data
             if (content.readableBytes <= 0) {
-                self.listener!.printer.print("No data \(packet.remoteAddress)")
+                //self.listener!.printer.print("No data \(packet.remoteAddress)")
                 // We have no use for empty packets.
                 return;
             }
@@ -182,7 +182,7 @@ public class Listener {
                 return
             }
             
-            self.listener!.printer.print("Unconnected: \(packetId)")
+            //self.listener!.printer.print("Unconnected: \(packetId)")
             
             // These packets don't require a session
             switch(packetId) {
@@ -260,19 +260,19 @@ public class Listener {
 //        }
         
         public func channelRegistered(context: ChannelHandlerContext) {
-            self.listener!.printer.print("Channel registered!")
+            //self.listener!.printer.print("Channel registered!")
         }
         
         public func channelActive(context: ChannelHandlerContext) {
-            self.listener!.printer.print("Channel active!")
+            //self.listener!.printer.print("Channel active!")
         }
         
         public func channelInactive(context: ChannelHandlerContext) {
-            self.listener!.printer.print("Channel inactive!")
+            //self.listener!.printer.print("Channel inactive!")
         }
         
         public func errorCaught(context: ChannelHandlerContext, error: Error) {
-            self.listener!.printer.print("An exception occurred in RakNet \(error.localizedDescription)")
+            //self.listener!.printer.print("An exception occurred in RakNet \(error.localizedDescription)")
             context.close(promise: nil)
         }
         

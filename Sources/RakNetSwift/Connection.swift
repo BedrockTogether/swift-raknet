@@ -78,7 +78,7 @@ public class Connection {
         if(self.ackQueue.count > 0){
             let pk = ACK(&self.ackQueue, Int32(self.mtu - 5))
             var buf = self.listener!.channel!.allocator.buffer(capacity: Int(self.mtu - 4))
-            self.listener!.printer.print("ack: \(self.ackQueue)")
+            //self.listener!.printer.print("ack: \(self.ackQueue)")
             pk.encode(&buf)
             self.sendPacket(&buf)
         }
@@ -86,7 +86,7 @@ public class Connection {
         if(self.nackQueue.count > 0){
             let pk = NACK(&self.nackQueue, Int32(self.mtu - 5))
             var buf = self.listener!.channel!.allocator.buffer(capacity: Int(self.mtu - 4))
-            self.listener!.printer.print("nack: \(self.ackQueue)")
+            //self.listener!.printer.print("nack: \(self.ackQueue)")
             pk.encode(&buf)
             self.sendPacket(&buf)
         }
@@ -141,20 +141,20 @@ public class Connection {
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
         let datagram = (header & Flags.FLAG_VALID) != 0
-        self.listener!.printer.print("id: \(header)")
+        //self.listener!.printer.print("id: \(header)")
         if datagram {
             if (header & Flags.FLAG_ACK) != 0 {
-                self.listener!.printer.print("ack")
+                //self.listener!.printer.print("ack")
                 self.handleACK(&buf)
             } else if (header & Flags.FLAG_NACK) != 0 {
-                self.listener!.printer.print("nack")
+                //self.listener!.printer.print("nack")
                 self.handleNACK(&buf)
             } else {
-                self.listener!.printer.print("datagram")
+                //self.listener!.printer.print("datagram")
                 self.handleDatagram(&buf)
             }
         } else {
-            self.listener!.printer.print("else")
+            //self.listener!.printer.print("else")
             if(header < 0x80) {
                 if(self.state == State.CONNECTING) {
                     if(header == PacketIdentifiers.ConnectionRequest){
@@ -192,7 +192,7 @@ public class Connection {
         packet.decode(&buf)
         for seq in packet.packets {
             for i in seq.start...seq.end {
-                self.listener!.printer.print("ackSeq: \(i)")
+                //self.listener!.printer.print("ackSeq: \(i)")
                 if self.sendDatagrams[Int32(i)] != nil {
                     for pk in self.sendDatagrams[Int32(i)]!.packets {
                         if pk != nil && pk!.needACK && pk!.messageIndex != -1 {
@@ -325,7 +325,7 @@ public class Connection {
         }
         
         let id = packet.buffer!.readInteger(as: UInt8.self)!
-        self.listener!.printer.print("packet: \(id)")
+        //self.listener!.printer.print("packet: \(id)")
         packet.buffer!.moveReaderIndex(to: 0)
         if(id < 0x80) {
             if(self.state == State.CONNECTING) {
@@ -348,7 +348,7 @@ public class Connection {
                     
                     let port = self.listener!.channel!.localAddress!.port!
                     if pk.address!.port! == port {
-                        self.listener!.printer.print("connected \(self.address!)")
+                        //self.listener!.printer.print("connected \(self.address!)")
                         self.state = .CONNECTED
                         self.listener!.connectionListener!.onOpenConnection(self)
                     }
@@ -369,7 +369,7 @@ public class Connection {
                 self.addToQueue(sendPk, Priority.IMMEDIATE)
             }
         } else if self.state == .CONNECTED {
-            self.listener!.printer.print("con: \(id)")
+            //self.listener!.printer.print("con: \(id)")
             self.listener!.connectionListener!.onEncapsulated(packet.buffer!, self.address!)
         }
     }
