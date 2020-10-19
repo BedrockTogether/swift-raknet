@@ -442,7 +442,7 @@ public class Connection {
         self.listener!.group!.next().submit {
             let packet = EncapsulatedPacket()
             packet.reliability = Reliability.RELIABLE_ORDERED
-            packet.buffer = buf
+            packet.buffer = buffer
             self.addEncapsulatedToQueue(packet, Priority.IMMEDIATE)
         }
     }
