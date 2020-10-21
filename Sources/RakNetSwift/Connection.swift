@@ -66,7 +66,7 @@ public class Connection {
     }
     
     func update(_ timestamp : Int64 ) {
-        if(timestamp - self.lastUpdate >= 10000){
+        if(timestamp - self.lastUpdate >= 4000){
             self.disconnect("timeout")
             return
         }
@@ -115,8 +115,7 @@ public class Connection {
         
         for (seq, pk) in self.sendDatagrams {
             let temp = self.outgoingPacket
-            if pk.sendTime < (Int64(NSDate().timeIntervalSince1970 * 1000) - 8) {
-//                self.outgoingPackets.append(pk)
+            if pk.sendTime + 2000 < Int64(NSDate().timeIntervalSince1970 * 1000) {
                 self.outgoingPacket = pk
                 self.sendQueue()
                 self.sendDatagrams[seq] = nil
