@@ -41,25 +41,28 @@ class Packet {
         var port : Int = 19132
         
         if type == 4 {
-            //let addri = ~(buf.readInteger(as: Int32.self)!)
             let ipBytes = buf.readBytes(length: 4)!
             ip = "\((-Int(ipBytes[0])-1)&0xff).\((-Int(ipBytes[1])-1)&0xff).\((-Int(ipBytes[2])-1)&0xff).\((-Int(ipBytes[3])-1)&0xff)"
-            //var bufC = ByteBuffer.init(integer: addri, as: Int32.self)
-            //addr = bufC.readBytes(length: bufC.readableBytes)!
             port = Int(buf.readInteger(as: UInt16.self)!)
-            
-            //ip = String(cString: inet_ntoa(in_addr(s_addr: in_addr_t(addri)))!)
         } else if type == 6 {
-//            buf.moveReaderIndex(forwardBy: 2) //family
-//            port = Int(buf.readInteger(as: UInt16.self)!)
-//            buf.moveReaderIndex(forwardBy: 4) //flow info
+            buf.moveReaderIndex(forwardBy: 2) //family
+            port = Int(buf.readInteger(as: UInt16.self)!)
+            buf.moveReaderIndex(forwardBy: 4) //flow info
 //            let length = Int(INET6_ADDRSTRLEN) + 2
 //            var buffer = [CChar](repeating: 0, count: length)
 //            let uint8Pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: 16)
 //            uint8Pointer.initialize(from: buf.readBytes(length: 16)!, count: 16)
 //            let hostCString = inet_ntop(AF_INET6, UnsafeRawPointer.init(uint8Pointer), &buffer, socklen_t(length))
 //            ip = String(cString: hostCString!)
-//            buf.moveReaderIndex(forwardBy: 4) //scope id
+            var addressBytes = buf.readBytes(length: 16)!
+            let bufLen = Int(INET6_ADDRSTRLEN)
+            var buffer = [CChar](repeating: 0, count: bufLen)
+            inet_ntop(AF_INET6, &addressBytes, &buffer, socklen_t(bufLen))
+            buf.moveReaderIndex(forwardBy: 4) //scope id
+            if let s = String(validatingUTF8: buffer) {
+                ip = s
+            }
+            
         }
         return try! SocketAddress(ipAddress: ip, port: port)
     }
