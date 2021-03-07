@@ -212,6 +212,8 @@ public class Listener {
                 
                 var buffer : ByteBuffer? = nil
                 
+                self.listener!.printer.print("RakNet protocol: \(decodePk.protocolVersion)")
+                
                 if decodePk.protocolVersion != PROTOCOL {
                     buffer = context.channel.allocator.buffer(capacity: 26)
                     let pk = IncompatibleProtocolVersion()
