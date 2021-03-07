@@ -14,7 +14,7 @@ Example listener [swift-raknet/Sources/Test/main.swift](https://github.com/Extol
 ## Todo
 - [x] Server-Client handshake
 - [x] Packets reassembly
-- [ ] Working ipv6 
+- [x] Working ipv6 
 - [ ] Use fast data structure instead of swift standard library
 - [ ] Stability tweaks
 - [ ] Reliability tweaks
