@@ -14,6 +14,7 @@ public class Connection {
     var listener : Listener?
     var mtu : Int32 = 0
     public var address : SocketAddress?
+    public let protocolVersion : Int
     
     var state : State = .CONNECTING //client connection state
     
@@ -53,10 +54,11 @@ public class Connection {
         
     var lastPing : Int64 = Int64(NSDate().timeIntervalSince1970 * 1000)
     
-    init(_ listener : Listener, _ mtu : Int32, _ address : SocketAddress){
+    init(_ listener : Listener, _ mtu : Int32, _ address : SocketAddress, _ protocolVersion : Int){
         self.listener = listener
         self.mtu = mtu
         self.address = address
+        self.protocolVersion = protocolVersion
         
         self.lastUpdate = Int64(NSDate().timeIntervalSince1970 * 1000)
         
@@ -155,7 +157,7 @@ public class Connection {
         } else {
             //self.listener!.printer.print("else")
             if(header < 0x80) {
-                if(self.state == State.CONNECTING) {
+                if(self.state == State.INITIALIZING) {
                     if(header == PacketIdentifiers.ConnectionRequest){
                         let pk = ConnectionRequest()
                         pk.decode(&buf)
@@ -180,6 +182,28 @@ public class Connection {
                             self.state = .CONNECTED
                             self.listener!.connectionListener!.onOpenConnection(self)
                         }
+                    }
+                } else if (self.state == State.CONNECTING) {
+                    if(header == PacketIdentifiers.OpenConnectionRequest2) {
+                        let pk = OpenConnectionRequest2()
+                        pk.decode(&buf)
+                        if !pk.valid(OfflinePacket.DEFAULT_MAGIC) {
+                            return
+                        }
+                        
+                        self.state = .INITIALIZING
+                        
+                        let sendPk = OpenConnectionReply2()
+                        var buffer = self.listener!.channel!.allocator.buffer(capacity: 31)
+                        sendPk.serverId = listener!.id
+                        sendPk.socketAddress = address
+                        sendPk.mtu = mtu
+                        sendPk.encode(&buffer)
+                        
+                        let encPk = EncapsulatedPacket()
+                        encPk.reliability = Reliability.RELIABLE
+                        encPk.buffer = buffer
+                        self.addToQueue(encPk, Priority.IMMEDIATE)
                     }
                 }
             }

@@ -10,6 +10,7 @@ import Foundation
 
 enum State : Int {
     case CONNECTING
+    case INITIALIZING
     case CONNECTED
     case DISCONNECTING
     case DISCONNECTED

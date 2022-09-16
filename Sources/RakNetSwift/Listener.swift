@@ -10,7 +10,8 @@ import Foundation
 import NIO
 
 // Minecraft related protocol
-let PROTOCOL = 10
+let SUPPORTED_PROTOCOLS = [10,11]
+let PROTOCOL = 11
 
 // Raknet ticks
 let RAKNET_TPS = 100
@@ -215,7 +216,10 @@ public class Listener {
                 
                 self.listener!.printer.print("RakNet protocol: \(decodePk.protocolVersion)")
                 
-                if decodePk.protocolVersion != PROTOCOL {
+                let mtu = decodePk.mtu < 576 ? 576 : (decodePk.mtu > 1400 ? 1400 : decodePk.mtu)
+                let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
+                
+                if !SUPPORTED_PROTOCOLS.contains(Int(decodePk.protocolVersion)) {
                     buffer = context.channel.allocator.buffer(capacity: 26)
                     let pk = IncompatibleProtocolVersion()
                     pk.protocolVersion = Int32(PROTOCOL)
@@ -225,30 +229,12 @@ public class Listener {
                     let pk = OpenConnectionReply1()
                     buffer = context.channel.allocator.buffer(capacity: 28)
                     pk.serverId = listener!.id
-                    pk.mtu = decodePk.mtu
+                    pk.mtu = adjustedMtu
                     
                     pk.encode(&buffer!)
                 }
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer!)))
-                break
-            case PacketIdentifiers.OpenConnectionRequest2:
-                let decodePk = OpenConnectionRequest2()
-                decodePk.decode(&content)
-                if !decodePk.valid(OfflinePacket.DEFAULT_MAGIC) {
-                    return
-                }
-                
-                let pk = OpenConnectionReply2()
-                var buffer = context.channel.allocator.buffer(capacity: 31)
-                pk.serverId = listener!.id
-                pk.socketAddress = packet.remoteAddress
-                
-                let mtu = decodePk.mtu < 576 ? 576 : (decodePk.mtu > 1400 ? 1400 : decodePk.mtu)
-                let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
-                pk.mtu = adjustedMtu
-                pk.encode(&buffer)
-                context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer)))
-                listener!.connections[packet.remoteAddress] = Connection(listener!, adjustedMtu, packet.remoteAddress)
+                listener!.connections[packet.remoteAddress] = Connection(listener!, adjustedMtu, packet.remoteAddress, Int(decodePk.protocolVersion))
                 break
             default:
                 //ignore
@@ -278,6 +264,5 @@ public class Listener {
             //self.listener!.printer.print("An exception occurred in RakNet \(error.localizedDescription)")
             context.close(promise: nil)
         }
-        
     }
 }
