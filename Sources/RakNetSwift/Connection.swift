@@ -142,7 +142,7 @@ public class Connection {
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
         let datagram = (header & Flags.FLAG_VALID) != 0
-        //self.listener!.printer.print("id: \(header)")
+        self.listener!.printer.print("id: \(header)")
         if datagram {
             if (header & Flags.FLAG_ACK) != 0 {
                 //self.listener!.printer.print("ack")
@@ -151,13 +151,14 @@ public class Connection {
                 //self.listener!.printer.print("nack")
                 self.handleNACK(&buf)
             } else {
-                //self.listener!.printer.print("datagram")
+                self.listener!.printer.print("datagram")
                 self.handleDatagram(&buf)
             }
         } else {
-            //self.listener!.printer.print("else")
+            self.listener!.printer.print("else")
             if(header < 0x80) {
                 if(self.state == State.INITIALIZING) {
+                    self.listener!.printer.print("INITIALIZING")
                     if(header == PacketIdentifiers.ConnectionRequest){
                         let pk = ConnectionRequest()
                         pk.decode(&buf)
@@ -184,7 +185,9 @@ public class Connection {
                         }
                     }
                 } else if (self.state == State.CONNECTING) {
+                    self.listener!.printer.print("CONNECTING")
                     if(header == PacketIdentifiers.OpenConnectionRequest2) {
+                        self.listener!.printer.print("OpenConnectionRequest2")
                         let pk = OpenConnectionRequest2()
                         pk.decode(&buf)
                         if !pk.valid(OfflinePacket.DEFAULT_MAGIC) {

@@ -220,12 +220,15 @@ public class Listener {
                 let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
                 
                 if !SUPPORTED_PROTOCOLS.contains(Int(decodePk.protocolVersion)) {
+                    self.listener!.printer.print("IncompatibleProtocolVersion")
                     buffer = context.channel.allocator.buffer(capacity: 26)
                     let pk = IncompatibleProtocolVersion()
                     pk.protocolVersion = Int32(PROTOCOL)
                     pk.serverId = listener!.id
                     pk.encode(&buffer!)
+                    return
                 } else {
+                    self.listener!.printer.print("OpenConnectionReply1")
                     let pk = OpenConnectionReply1()
                     buffer = context.channel.allocator.buffer(capacity: 28)
                     pk.serverId = listener!.id
