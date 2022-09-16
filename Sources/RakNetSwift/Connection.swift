@@ -157,8 +157,7 @@ public class Connection {
         } else {
             self.listener!.printer.print("else")
             if(header < 0x80) {
-                if(self.state == State.INITIALIZING) {
-                    self.listener!.printer.print("INITIALIZING")
+                if(self.state == State.CONNECTING) {
                     if(header == PacketIdentifiers.ConnectionRequest){
                         let pk = ConnectionRequest()
                         pk.decode(&buf)
@@ -183,30 +182,6 @@ public class Connection {
                             self.state = .CONNECTED
                             self.listener!.connectionListener!.onOpenConnection(self)
                         }
-                    }
-                } else if (self.state == State.CONNECTING) {
-                    self.listener!.printer.print("CONNECTING")
-                    if(header == PacketIdentifiers.OpenConnectionRequest2) {
-                        self.listener!.printer.print("OpenConnectionRequest2")
-                        let pk = OpenConnectionRequest2()
-                        pk.decode(&buf)
-                        if !pk.valid(OfflinePacket.DEFAULT_MAGIC) {
-                            return
-                        }
-                        
-                        self.state = .INITIALIZING
-                        
-                        let sendPk = OpenConnectionReply2()
-                        var buffer = self.listener!.channel!.allocator.buffer(capacity: 31)
-                        sendPk.serverId = listener!.id
-                        sendPk.socketAddress = address
-                        sendPk.mtu = mtu
-                        sendPk.encode(&buffer)
-                        
-                        let encPk = EncapsulatedPacket()
-                        encPk.reliability = Reliability.RELIABLE
-                        encPk.buffer = buffer
-                        self.addToQueue(encPk, Priority.IMMEDIATE)
                     }
                 }
             }

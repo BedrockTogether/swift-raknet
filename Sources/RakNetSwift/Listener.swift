@@ -177,12 +177,6 @@ public class Listener {
             }
             let packetId = content.readInteger(as: UInt8.self)!
             content.moveReaderIndex(to: 0)
-            let connection = listener!.connections[packet.remoteAddress]
-            
-            if (connection != nil) {
-                connection!.recieve(&content)
-                return
-            }
             
             //self.listener!.printer.print("Unconnected: \(packetId)")
             
@@ -239,8 +233,30 @@ public class Listener {
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer!)))
                 listener!.connections[packet.remoteAddress] = Connection(listener!, adjustedMtu, packet.remoteAddress, Int(decodePk.protocolVersion))
                 break
+            case PacketIdentifiers.OpenConnectionRequest2:
+                let decodePk = OpenConnectionRequest2()
+                decodePk.decode(&content)
+                if !decodePk.valid(OfflinePacket.DEFAULT_MAGIC) {
+                    return
+                }
+                
+                let pk = OpenConnectionReply2()
+                var buffer = context.channel.allocator.buffer(capacity: 31)
+                pk.serverId = listener!.id
+                pk.socketAddress = packet.remoteAddress
+                
+                let mtu = decodePk.mtu < 576 ? 576 : (decodePk.mtu > 1400 ? 1400 : decodePk.mtu)
+                let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
+                pk.mtu = adjustedMtu
+                pk.encode(&buffer)
+                context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer)))
+                break
             default:
-                //ignore
+                let connection = listener!.connections[packet.remoteAddress]
+                
+                if (connection != nil) {
+                    connection!.recieve(&content)
+                }
                 break
             }
         }
