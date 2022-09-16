@@ -178,6 +178,7 @@ public class Listener {
             let packetId = content.readInteger(as: UInt8.self)!
             content.moveReaderIndex(to: 0)
             
+            let connection = listener!.connections[packet.remoteAddress]
             //self.listener!.printer.print("Unconnected: \(packetId)")
             
             // These packets don't require a session
@@ -205,7 +206,7 @@ public class Listener {
                 if !decodePk.valid(OfflinePacket.DEFAULT_MAGIC) {
                     return
                 }
-                
+                                
                 var buffer : ByteBuffer? = nil
                 
                 self.listener!.printer.print("RakNet protocol: \(decodePk.protocolVersion)")
@@ -214,7 +215,7 @@ public class Listener {
                 let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
                 
                 if !SUPPORTED_PROTOCOLS.contains(Int(decodePk.protocolVersion)) {
-                    self.listener!.printer.print("IncompatibleProtocolVersion")
+                    // self.listener!.printer.print("IncompatibleProtocolVersion")
                     buffer = context.channel.allocator.buffer(capacity: 26)
                     let pk = IncompatibleProtocolVersion()
                     pk.protocolVersion = Int32(PROTOCOL)
@@ -222,7 +223,7 @@ public class Listener {
                     pk.encode(&buffer!)
                     return
                 } else {
-                    self.listener!.printer.print("OpenConnectionReply1")
+                    // self.listener!.printer.print("OpenConnectionReply1")
                     let pk = OpenConnectionReply1()
                     buffer = context.channel.allocator.buffer(capacity: 28)
                     pk.serverId = listener!.id
@@ -231,7 +232,9 @@ public class Listener {
                     pk.encode(&buffer!)
                 }
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer!)))
-                listener!.connections[packet.remoteAddress] = Connection(listener!, adjustedMtu, packet.remoteAddress, Int(decodePk.protocolVersion))
+                if (connection == nil) {
+                    listener!.connections[packet.remoteAddress] = Connection(listener!, adjustedMtu, packet.remoteAddress, Int(decodePk.protocolVersion))
+                }
                 break
             case PacketIdentifiers.OpenConnectionRequest2:
                 let decodePk = OpenConnectionRequest2()
@@ -252,8 +255,6 @@ public class Listener {
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer)))
                 break
             default:
-                let connection = listener!.connections[packet.remoteAddress]
-                
                 if (connection != nil) {
                     connection!.recieve(&content)
                 }
