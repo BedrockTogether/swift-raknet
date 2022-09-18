@@ -211,9 +211,6 @@ public class Listener {
                 
                 self.listener!.printer.print("RakNet protocol: \(decodePk.protocolVersion)")
                 
-                let mtu = decodePk.mtu < 576 ? 576 : (decodePk.mtu > 1400 ? 1400 : decodePk.mtu)
-                let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
-                
                 if !SUPPORTED_PROTOCOLS.contains(Int(decodePk.protocolVersion)) {
                     self.listener!.printer.print("IncompatibleProtocolVersion")
                     buffer = context.channel.allocator.buffer(capacity: 26)
@@ -227,13 +224,13 @@ public class Listener {
                     let pk = OpenConnectionReply1()
                     buffer = context.channel.allocator.buffer(capacity: 28)
                     pk.serverId = listener!.id
-                    pk.mtu = adjustedMtu
+                    pk.mtu = decodePk.mtu
                     
                     pk.encode(&buffer!)
                 }
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer!)))
                 if (connection == nil) {
-                    listener!.connections[packet.remoteAddress] = Connection(listener!, adjustedMtu, packet.remoteAddress, Int(decodePk.protocolVersion))
+                    listener!.connections[packet.remoteAddress] = Connection(listener!, decodePk.mtu, packet.remoteAddress, Int(decodePk.protocolVersion))
                 }
                 break
             case PacketIdentifiers.OpenConnectionRequest2:
@@ -254,6 +251,9 @@ public class Listener {
                 pk.mtu = adjustedMtu
                 pk.encode(&buffer)
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer)))
+                if (connection != nil) {
+                    connection!.mtu = adjustedMtu
+                }
                 break
             default:
                 if (connection != nil) {
