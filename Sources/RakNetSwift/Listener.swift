@@ -179,7 +179,7 @@ public class Listener {
             content.moveReaderIndex(to: 0)
             
             let connection = listener!.connections[packet.remoteAddress]
-            //self.listener!.printer.print("Unconnected: \(packetId)")
+            self.listener!.printer.print("Unconnected: \(packetId)")
             
             // These packets don't require a session
             switch(packetId) {
@@ -215,7 +215,7 @@ public class Listener {
                 let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
                 
                 if !SUPPORTED_PROTOCOLS.contains(Int(decodePk.protocolVersion)) {
-                    // self.listener!.printer.print("IncompatibleProtocolVersion")
+                    self.listener!.printer.print("IncompatibleProtocolVersion")
                     buffer = context.channel.allocator.buffer(capacity: 26)
                     let pk = IncompatibleProtocolVersion()
                     pk.protocolVersion = Int32(PROTOCOL)
@@ -223,7 +223,7 @@ public class Listener {
                     pk.encode(&buffer!)
                     return
                 } else {
-                    // self.listener!.printer.print("OpenConnectionReply1")
+                    self.listener!.printer.print("OpenConnectionReply1")
                     let pk = OpenConnectionReply1()
                     buffer = context.channel.allocator.buffer(capacity: 28)
                     pk.serverId = listener!.id
@@ -248,6 +248,7 @@ public class Listener {
                 pk.serverId = listener!.id
                 pk.socketAddress = packet.remoteAddress
                 
+                self.listener!.printer.print("OpenConnectionReply2")
                 let mtu = decodePk.mtu < 576 ? 576 : (decodePk.mtu > 1400 ? 1400 : decodePk.mtu)
                 let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
                 pk.mtu = adjustedMtu
@@ -256,6 +257,7 @@ public class Listener {
                 break
             default:
                 if (connection != nil) {
+                    self.listener!.printer.print("default")
                     connection!.recieve(&content)
                 }
                 break
