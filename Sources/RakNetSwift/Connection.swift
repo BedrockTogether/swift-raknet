@@ -14,6 +14,7 @@ public class Connection {
     var listener : Listener?
     var mtu : Int32 = 0
     public var address : SocketAddress?
+    public let protocolVersion : Int
     
     var state : State = .CONNECTING //client connection state
     
@@ -53,10 +54,11 @@ public class Connection {
         
     var lastPing : Int64 = Int64(NSDate().timeIntervalSince1970 * 1000)
     
-    init(_ listener : Listener, _ mtu : Int32, _ address : SocketAddress){
+    init(_ listener : Listener, _ mtu : Int32, _ address : SocketAddress, _ protocolVersion : Int){
         self.listener = listener
         self.mtu = mtu
         self.address = address
+        self.protocolVersion = protocolVersion
         
         self.lastUpdate = Int64(NSDate().timeIntervalSince1970 * 1000)
         
@@ -140,20 +142,20 @@ public class Connection {
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
         let datagram = (header & Flags.FLAG_VALID) != 0
-        //self.listener!.printer.print("id: \(header)")
+        // self.listener!.printer.print("id: \(header)")
         if datagram {
             if (header & Flags.FLAG_ACK) != 0 {
-                //self.listener!.printer.print("ack")
+                // self.listener!.printer.print("ack")
                 self.handleACK(&buf)
             } else if (header & Flags.FLAG_NACK) != 0 {
-                //self.listener!.printer.print("nack")
+                // self.listener!.printer.print("nack")
                 self.handleNACK(&buf)
             } else {
-                //self.listener!.printer.print("datagram")
+                // self.listener!.printer.print("datagram")
                 self.handleDatagram(&buf)
             }
         } else {
-            //self.listener!.printer.print("else")
+            // self.listener!.printer.print("else")
             if(header < 0x80) {
                 if(self.state == State.CONNECTING) {
                     if(header == PacketIdentifiers.ConnectionRequest){
@@ -324,7 +326,7 @@ public class Connection {
         }
         
         let id = packet.buffer!.readInteger(as: UInt8.self)!
-        //self.listener!.printer.print("packet: \(id)")
+        // self.listener!.printer.print("packet: \(id)")
         packet.buffer!.moveReaderIndex(to: 0)
         if(id < 0x80) {
             if(self.state == State.CONNECTING) {
@@ -368,7 +370,7 @@ public class Connection {
                 self.addToQueue(sendPk, Priority.IMMEDIATE)
             }
         } else if self.state == .CONNECTED {
-            //self.listener!.printer.print("con: \(id)")
+            // self.listener!.printer.print("con: \(id)")
             self.listener!.connectionListener!.onEncapsulated(packet.buffer!, self.address!)
         }
     }
