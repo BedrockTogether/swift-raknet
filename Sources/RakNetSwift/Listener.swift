@@ -179,7 +179,7 @@ public class Listener {
             content.moveReaderIndex(to: 0)
             
             let connection = listener!.connections[packet.remoteAddress]
-            self.listener!.printer.print("Unconnected: \(packetId)")
+            // self.listener!.printer.print("Unconnected: \(packetId)")
             
             // These packets don't require a session
             switch(packetId) {
