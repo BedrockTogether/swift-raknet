@@ -139,7 +139,7 @@ public class Connection {
     }
     
     func recieve(_ buf : inout ByteBuffer){
-        self.listener!.printer.print("state \(self.state)")
+        // self.listener!.printer.print("state \(self.state)")
         
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
@@ -153,7 +153,7 @@ public class Connection {
                 // self.listener!.printer.print("nack")
                 self.handleNACK(&buf)
             } else {
-                self.listener!.printer.print("datagram")
+                // self.listener!.printer.print("datagram")
                 self.handleDatagram(&buf)
             }
         } else {
@@ -372,7 +372,7 @@ public class Connection {
                 self.addToQueue(sendPk, Priority.IMMEDIATE)
             }
         } else if self.state == .CONNECTED {
-            self.listener!.printer.print("con: \(id)")
+            // self.listener!.printer.print("con: \(id)")
             self.listener!.connectionListener!.onEncapsulated(packet.buffer!, self.address!)
         }
     }

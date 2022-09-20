@@ -180,7 +180,7 @@ public class Listener {
             
             let connection = listener!.connections[packet.remoteAddress]
             if (connection != nil && connection!.state != .CONNECTING) {
-                self.listener!.printer.print("connected")
+                // self.listener!.printer.print("connected")
                 connection!.recieve(&content)
             }
             
@@ -217,7 +217,7 @@ public class Listener {
                 self.listener!.printer.print("RakNet protocol: \(decodePk.protocolVersion)")
                 
                 if !SUPPORTED_PROTOCOLS.contains(Int(decodePk.protocolVersion)) {
-                    self.listener!.printer.print("IncompatibleProtocolVersion")
+                    // self.listener!.printer.print("IncompatibleProtocolVersion")
                     buffer = context.channel.allocator.buffer(capacity: 26)
                     let pk = IncompatibleProtocolVersion()
                     pk.protocolVersion = Int32(PROTOCOL)
