@@ -179,28 +179,29 @@ public class Listener {
             let packetId = content.readInteger(as: UInt8.self)!
             content.moveReaderIndex(to: 0)
             
+            let msgId = Listener.ServerDatagramHandler.MSG_ID
             Listener.ServerDatagramHandler.MSG_ID = Listener.ServerDatagramHandler.MSG_ID + 1
-            self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] Start")
+            self.listener!.printer.print("[\(msgId)] Start")
             let connection = listener!.connections[packet.remoteAddress]
             if (connection != nil && connection!.state != .CONNECTING) {
-                self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] 1 state \(connection!.state)")
+                self.listener!.printer.print("[\(msgId)] 1 state \(connection!.state)")
                 connection!.recieve(&content)
                 return
             }
-            self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] Address 1 \(packet.remoteAddress)")
-            self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] Unconnected: \(packetId)")
+            self.listener!.printer.print("[\(msgId)] Address 1 \(packet.remoteAddress)")
+            self.listener!.printer.print("[\(msgId)] Unconnected: \(packetId)")
             
             // These packets don't require a session
             switch(packetId) {
             case PacketIdentifiers.UnconnectedPing:
-                self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] Address 2 \(packet.remoteAddress)")
+                self.listener!.printer.print("[\(msgId)] Address 2 \(packet.remoteAddress)")
                 let decodePk = UnconnectedPing()
                 decodePk.decode(&content)
                 if !decodePk.valid(OfflinePacket.DEFAULT_MAGIC) {
-                    self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] 2 state \(connection?.state ?? .CONNECTING)")
+                    self.listener!.printer.print("[\(msgId)] 2 state \(connection?.state ?? .CONNECTING)")
                     return
                 }
-                self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] 3 state \(connection?.state ?? .CONNECTING)")
+                self.listener!.printer.print("[\(msgId)] 3 state \(connection?.state ?? .CONNECTING)")
 
                 let pk = UnconnectedPong()
                 let motd = listener!.info!.toString()
@@ -221,7 +222,7 @@ public class Listener {
                                 
                 var buffer : ByteBuffer? = nil
                 
-                self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] RakNet protocol: \(decodePk.protocolVersion)")
+                self.listener!.printer.print("[\(msgId)] RakNet protocol: \(decodePk.protocolVersion)")
                 
                 if !SUPPORTED_PROTOCOLS.contains(Int(decodePk.protocolVersion)) {
                     // self.listener!.printer.print("IncompatibleProtocolVersion")
@@ -231,7 +232,7 @@ public class Listener {
                     pk.serverId = listener!.id
                     pk.encode(&buffer!)
                 } else {
-                    self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] OpenConnectionReply1")
+                    self.listener!.printer.print("[\(msgId)] OpenConnectionReply1")
                     let pk = OpenConnectionReply1()
                     buffer = context.channel.allocator.buffer(capacity: 28)
                     pk.serverId = listener!.id
@@ -240,7 +241,7 @@ public class Listener {
                     pk.encode(&buffer!)
                 }
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer!)))
-                self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] Address 3 \(packet.remoteAddress)")
+                self.listener!.printer.print("[\(msgId)] Address 3 \(packet.remoteAddress)")
                 if (connection == nil) {
                     listener!.connections[packet.remoteAddress] = Connection(listener!, decodePk.mtu, packet.remoteAddress, Int(decodePk.protocolVersion))
                 }
@@ -257,13 +258,13 @@ public class Listener {
                 pk.serverId = listener!.id
                 pk.socketAddress = packet.remoteAddress
                 
-                self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] OpenConnectionReply2")
+                self.listener!.printer.print("[\(msgId)] OpenConnectionReply2")
                 let mtu = decodePk.mtu < 576 ? 576 : (decodePk.mtu > 1400 ? 1400 : decodePk.mtu)
                 let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
                 pk.mtu = adjustedMtu
                 pk.encode(&buffer)
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer)))
-                self.listener!.printer.print("[\(Listener.ServerDatagramHandler.MSG_ID)] Address 4 \(packet.remoteAddress)")
+                self.listener!.printer.print("[\(msgId)] Address 4 \(packet.remoteAddress)")
                 if (connection != nil) {
                     connection!.state = .INITIALIZING
                     connection!.mtu = adjustedMtu
