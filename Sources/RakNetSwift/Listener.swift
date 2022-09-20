@@ -180,22 +180,25 @@ public class Listener {
             
             let connection = listener!.connections[packet.remoteAddress]
             if (connection != nil && connection!.state != .CONNECTING) {
-                // self.listener!.printer.print("connected")
+                self.listener!.printer.print("1 state \(connection!.state)")
                 connection!.recieve(&content)
                 return
             }
-            
+            self.listener!.printer.print("Address 1 \(packet.remoteAddress)")
             self.listener!.printer.print("Unconnected: \(packetId)")
             
             // These packets don't require a session
             switch(packetId) {
             case PacketIdentifiers.UnconnectedPing:
+                self.listener!.printer.print("Address 2 \(packet.remoteAddress)")
                 let decodePk = UnconnectedPing()
                 decodePk.decode(&content)
                 if !decodePk.valid(OfflinePacket.DEFAULT_MAGIC) {
+                    self.listener!.printer.print("2 state \(connection!.state)")
                     return
                 }
-                
+                self.listener!.printer.print("3 state \(connection!.state)")
+
                 let pk = UnconnectedPong()
                 let motd = listener!.info!.toString()
                 let packetLength = 35 + motd.count
@@ -224,7 +227,6 @@ public class Listener {
                     pk.protocolVersion = Int32(PROTOCOL)
                     pk.serverId = listener!.id
                     pk.encode(&buffer!)
-                    return
                 } else {
                     self.listener!.printer.print("OpenConnectionReply1")
                     let pk = OpenConnectionReply1()
@@ -235,6 +237,7 @@ public class Listener {
                     pk.encode(&buffer!)
                 }
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer!)))
+                self.listener!.printer.print("Address 3 \(packet.remoteAddress)")
                 if (connection == nil) {
                     listener!.connections[packet.remoteAddress] = Connection(listener!, decodePk.mtu, packet.remoteAddress, Int(decodePk.protocolVersion))
                 }
@@ -257,6 +260,7 @@ public class Listener {
                 pk.mtu = adjustedMtu
                 pk.encode(&buffer)
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer)))
+                self.listener!.printer.print("Address 4 \(packet.remoteAddress)")
                 if (connection != nil) {
                     connection!.state = .INITIALIZING
                     connection!.mtu = adjustedMtu
