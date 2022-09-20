@@ -10,7 +10,7 @@ import Foundation
 import NIO
 
 // Minecraft related protocol
-let PROTOCOL = 10
+let PROTOCOL = 11
 
 // Raknet ticks
 let RAKNET_TPS = 100
