@@ -252,6 +252,7 @@ public class Listener {
                 pk.encode(&buffer)
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer)))
                 if (connection != nil) {
+                    connection!.state = .INITIALIZING
                     connection!.mtu = adjustedMtu
                 }
                 break

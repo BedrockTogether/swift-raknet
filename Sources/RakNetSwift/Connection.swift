@@ -139,6 +139,10 @@ public class Connection {
     }
     
     func recieve(_ buf : inout ByteBuffer){
+        if (self.state == .CONNECTING) {
+            return
+        }
+        
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
         let datagram = (header & Flags.FLAG_VALID) != 0
@@ -157,7 +161,7 @@ public class Connection {
         } else {
             // self.listener!.printer.print("else")
             if(header < 0x80) {
-                if(self.state == State.CONNECTING) {
+                if(self.state == State.INITIALIZING) {
                     if(header == PacketIdentifiers.ConnectionRequest){
                         let pk = ConnectionRequest()
                         pk.decode(&buf)
