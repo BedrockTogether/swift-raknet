@@ -160,6 +160,7 @@ public class Listener {
         public typealias InboundIn = AddressedEnvelope<ByteBuffer>
         public typealias OutboundOut = AddressedEnvelope<ByteBuffer>
         public var listener : Listener?
+        var connection: Connection? = nil
         
         public init (_ listener : Listener) {
             self.listener = listener
@@ -176,7 +177,7 @@ public class Listener {
             }
             let packetId = content.readInteger(as: UInt8.self)!
             content.moveReaderIndex(to: 0)
-            let connection = listener!.connections[packet.remoteAddress]
+            // let connection = listener!.connections[packet.remoteAddress]
             
             if (connection != nil) {
                 self.listener!.printer.print("Address inner \(packet.remoteAddress)")
@@ -252,6 +253,7 @@ public class Listener {
                 pk.encode(&buffer)
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer)))
                 listener!.connections[packet.remoteAddress] = Connection(listener!, adjustedMtu, packet.remoteAddress)
+                connection = listener!.connections[packet.remoteAddress]
                 break
             default:
                 //ignore
