@@ -179,6 +179,11 @@ public class Listener {
             content.moveReaderIndex(to: 0)
             
             let connection = listener!.connections[packet.remoteAddress]
+            if (connection != nil && connection!.state != .CONNECTING) {
+                self.listener!.printer.print("connected")
+                connection!.recieve(&content)
+            }
+            
             self.listener!.printer.print("Unconnected: \(packetId)")
             
             // These packets don't require a session
@@ -257,10 +262,7 @@ public class Listener {
                 }
                 break
             default:
-                if (connection != nil) {
-                    self.listener!.printer.print("default")
-                    connection!.recieve(&content)
-                }
+                // ignore
                 break
             }
         }

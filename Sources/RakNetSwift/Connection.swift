@@ -139,10 +139,7 @@ public class Connection {
     }
     
     func recieve(_ buf : inout ByteBuffer){
-        if (self.state == .CONNECTING) {
-            self.listener!.printer.print("state \(self.state)")
-            return
-        }
+        self.listener!.printer.print("state \(self.state)")
         
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
@@ -334,7 +331,7 @@ public class Connection {
         self.listener!.printer.print("packet: \(id)")
         packet.buffer!.moveReaderIndex(to: 0)
         if(id < 0x80) {
-            if(self.state == State.CONNECTING) {
+            if(self.state == State.INITIALIZING) {
                 if(id == PacketIdentifiers.ConnectionRequest){
                     let pk = ConnectionRequest()
                     pk.decode(&packet.buffer!)
