@@ -179,11 +179,14 @@ public class Listener {
             let connection = listener!.connections[packet.remoteAddress]
             
             if (connection != nil) {
+                self.listener!.printer.print("Address inner \(packet.remoteAddress)")
+
                 connection!.recieve(&content)
                 return
             }
-            
-            //self.listener!.printer.print("Unconnected: \(packetId)")
+            self.listener!.printer.print("Address: \(packet.remoteAddress)")
+
+            self.listener!.printer.print("Unconnected: \(packetId)")
             
             // These packets don't require a session
             switch(packetId) {

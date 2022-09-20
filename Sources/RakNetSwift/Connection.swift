@@ -149,7 +149,7 @@ public class Connection {
                 //self.listener!.printer.print("nack")
                 self.handleNACK(&buf)
             } else {
-                //self.listener!.printer.print("datagram")
+                self.listener!.printer.print("datagram")
                 self.handleDatagram(&buf)
             }
         } else {
@@ -324,7 +324,7 @@ public class Connection {
         }
         
         let id = packet.buffer!.readInteger(as: UInt8.self)!
-        //self.listener!.printer.print("packet: \(id)")
+        self.listener!.printer.print("packet: \(id)")
         packet.buffer!.moveReaderIndex(to: 0)
         if(id < 0x80) {
             if(self.state == State.CONNECTING) {
