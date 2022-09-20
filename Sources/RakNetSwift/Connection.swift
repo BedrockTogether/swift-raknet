@@ -140,13 +140,14 @@ public class Connection {
     
     func recieve(_ buf : inout ByteBuffer){
         if (self.state == .CONNECTING) {
+            self.listener!.printer.print("state \(self.state)")
             return
         }
         
         let header = buf.readInteger(as: UInt8.self)!
         buf.moveReaderIndex(to: 0)
         let datagram = (header & Flags.FLAG_VALID) != 0
-        // self.listener!.printer.print("id: \(header)")
+        self.listener!.printer.print("id: \(header)")
         if datagram {
             if (header & Flags.FLAG_ACK) != 0 {
                 // self.listener!.printer.print("ack")
@@ -155,11 +156,11 @@ public class Connection {
                 // self.listener!.printer.print("nack")
                 self.handleNACK(&buf)
             } else {
-                // self.listener!.printer.print("datagram")
+                self.listener!.printer.print("datagram")
                 self.handleDatagram(&buf)
             }
         } else {
-            // self.listener!.printer.print("else")
+            self.listener!.printer.print("else")
             if(header < 0x80) {
                 if(self.state == State.INITIALIZING) {
                     if(header == PacketIdentifiers.ConnectionRequest){
@@ -330,7 +331,7 @@ public class Connection {
         }
         
         let id = packet.buffer!.readInteger(as: UInt8.self)!
-        // self.listener!.printer.print("packet: \(id)")
+        self.listener!.printer.print("packet: \(id)")
         packet.buffer!.moveReaderIndex(to: 0)
         if(id < 0x80) {
             if(self.state == State.CONNECTING) {
@@ -374,7 +375,7 @@ public class Connection {
                 self.addToQueue(sendPk, Priority.IMMEDIATE)
             }
         } else if self.state == .CONNECTED {
-            // self.listener!.printer.print("con: \(id)")
+            self.listener!.printer.print("con: \(id)")
             self.listener!.connectionListener!.onEncapsulated(packet.buffer!, self.address!)
         }
     }
