@@ -182,6 +182,7 @@ public class Listener {
             if (connection != nil && connection!.state != .CONNECTING) {
                 // self.listener!.printer.print("connected")
                 connection!.recieve(&content)
+                return
             }
             
             self.listener!.printer.print("Unconnected: \(packetId)")
