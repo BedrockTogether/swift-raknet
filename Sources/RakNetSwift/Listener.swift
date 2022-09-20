@@ -194,10 +194,10 @@ public class Listener {
                 let decodePk = UnconnectedPing()
                 decodePk.decode(&content)
                 if !decodePk.valid(OfflinePacket.DEFAULT_MAGIC) {
-                    self.listener!.printer.print("2 state \(connection!.state)")
+                    self.listener!.printer.print("2 state \(connection?.state ?? .CONNECTING)")
                     return
                 }
-                self.listener!.printer.print("3 state \(connection!.state)")
+                self.listener!.printer.print("3 state \(connection?.state ?? .CONNECTING)")
 
                 let pk = UnconnectedPong()
                 let motd = listener!.info!.toString()
