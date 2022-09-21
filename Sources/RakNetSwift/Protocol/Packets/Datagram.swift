@@ -24,7 +24,7 @@ class Datagram : Packet {
     override func decode(_ buf : inout ByteBuffer) {
         super.decode(&buf)
         sequenceNumber = buf.readUInt24()
-        if buf.readableBytes > 0 {
+        while(buf.readableBytes > 0) {
             let packet = EncapsulatedPacket()
             packet.decode(&buf)
             packets.append(packet)
