@@ -326,7 +326,7 @@ public class Connection {
         }
         
         let id = packet.buffer!.readInteger(as: UInt8.self)!
-        // self.listener!.printer.print("packet: \(id)")
+        self.listener!.printer.print("packet: \(id)")
         packet.buffer!.moveReaderIndex(to: 0)
         if(id < 0x80) {
             if(self.state == State.CONNECTING) {
@@ -370,7 +370,7 @@ public class Connection {
                 self.addToQueue(sendPk, Priority.IMMEDIATE)
             }
         } else if self.state == .CONNECTED {
-            // self.listener!.printer.print("con: \(id)")
+            self.listener!.printer.print("con: \(id)")
             self.listener!.connectionListener!.onEncapsulated(packet.buffer!, self.address!)
         }
     }

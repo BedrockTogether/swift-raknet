@@ -179,7 +179,9 @@ public class Listener {
             content.moveReaderIndex(to: 0)
             
             let connection = listener!.connections[packet.remoteAddress]
-            // self.listener!.printer.print("Unconnected: \(packetId)")
+            if (connection == nil) {
+                self.listener!.printer.print("Unconnected: \(packetId)")
+            }
             
             // These packets don't require a session
             switch(packetId) {
@@ -212,15 +214,14 @@ public class Listener {
                 self.listener!.printer.print("RakNet protocol: \(decodePk.protocolVersion)")
                 
                 if !SUPPORTED_PROTOCOLS.contains(Int(decodePk.protocolVersion)) {
-                    // self.listener!.printer.print("IncompatibleProtocolVersion")
+                    self.listener!.printer.print("IncompatibleProtocolVersion")
                     buffer = context.channel.allocator.buffer(capacity: 26)
                     let pk = IncompatibleProtocolVersion()
                     pk.protocolVersion = Int32(PROTOCOL)
                     pk.serverId = listener!.id
                     pk.encode(&buffer!)
-                    return
                 } else {
-                    // self.listener!.printer.print("OpenConnectionReply1")
+                    self.listener!.printer.print("OpenConnectionReply1")
                     let pk = OpenConnectionReply1()
                     buffer = context.channel.allocator.buffer(capacity: 28)
                     pk.serverId = listener!.id
@@ -230,7 +231,9 @@ public class Listener {
                 }
                 context.writeAndFlush(self.wrapOutboundOut(AddressedEnvelope(remoteAddress: packet.remoteAddress, data: buffer!)))
                 if (connection == nil) {
-                    listener!.connections[packet.remoteAddress] = Connection(listener!, decodePk.mtu, packet.remoteAddress, Int(decodePk.protocolVersion))
+                    let mtu = decodePk.mtu < 576 ? 576 : (decodePk.mtu > 1400 ? 1400 : decodePk.mtu)
+                    let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
+                    listener!.connections[packet.remoteAddress] = Connection(listener!, adjustedMtu, packet.remoteAddress, Int(decodePk.protocolVersion))
                 }
                 break
             case PacketIdentifiers.OpenConnectionRequest2:
@@ -245,7 +248,7 @@ public class Listener {
                 pk.serverId = listener!.id
                 pk.socketAddress = packet.remoteAddress
                 
-                // self.listener!.printer.print("OpenConnectionReply2")
+                self.listener!.printer.print("OpenConnectionReply2")
                 let mtu = decodePk.mtu < 576 ? 576 : (decodePk.mtu > 1400 ? 1400 : decodePk.mtu)
                 let adjustedMtu = mtu - 8 - (packet.remoteAddress.protocol == .inet6 ? 40 : 20)
                 pk.mtu = adjustedMtu
