@@ -102,6 +102,7 @@ public class Client {
                 for (address, pingEntry) in self.pings {
                     if (currentTime >= pingEntry.timeout) {
                         pingEntry.promise.fail(TimeoutError("Ping timeout"))
+                        self.pings[address] = nil
                     } else if ((currentTime - pingEntry.sendTime) >= RAKNET_PING_INTERVAL) {
                         pingEntry.sendTime = currentTime
                         self.sendUnconnectedPing(address, currentTime)
