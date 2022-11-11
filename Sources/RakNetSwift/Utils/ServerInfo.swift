@@ -33,4 +33,9 @@ public class ServerInfo {
     func toString() -> String {
         return "MCPE;\(self.motd);\(self.protocolVersion);\(self.version);\(self.currentPlayers);\(self.maxPlayers);\(self.serverId);\(self.name);\(self.gamemode)";
     }
+    
+    static func from(_ info: String) -> ServerInfo {
+        let infos = info.split(separator: ";")
+        return ServerInfo(String(infos[1]), String(infos[7]), Int(infos[2])!, String(infos[3]), Int(infos[4])!, Int(infos[5])!, String(infos[8]), Int(infos[6])!)
+    }
 }

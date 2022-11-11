@@ -61,6 +61,8 @@ public class Client {
             return nil
         }
         
+        self.tick()
+        
         //self.printer.print("Server started and listening on \(channel!.localAddress!)")
         
         return channel!.closeFuture
@@ -92,7 +94,6 @@ public class Client {
     }
     
     func tick() {
-                
         updateTask = channel!.eventLoop.next().scheduleRepeatedTask(initialDelay: TimeAmount.milliseconds(0), delay: TimeAmount.milliseconds(Int64(RAKNET_TICK_LENGTH * 1000)), {
             repeatedTask in
             if(!self.shutdown) {
@@ -150,6 +151,10 @@ public class Client {
                 if !decodePk.valid(OfflinePacket.DEFAULT_MAGIC) {
                     return
                 }
+                
+                let pingEntry = client!.pings[packet.remoteAddress]
+                client!.pings[packet.remoteAddress] = nil
+                pingEntry!.promise.succeed(ServerInfo.from(decodePk.info))
                 
                 break
             default:
