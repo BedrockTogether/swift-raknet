@@ -34,6 +34,10 @@ public class Client {
     
     var group : EventLoopGroup?
     
+    public init() {
+        
+    }
+    
     public var allocator : ByteBufferAllocator {
         get {
             return self.channel!.allocator
