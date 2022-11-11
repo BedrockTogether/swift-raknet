@@ -31,9 +31,7 @@ public class Client {
     public var printer : Printer = StandardOutput()
     
     var updateTask : RepeatedTask?
-    
-    var group : EventLoopGroup?
-    
+        
     public init() {
         
     }
@@ -45,7 +43,6 @@ public class Client {
     }
     
     public func bind(_ host : String = "0.0.0.0", _ port : Int = 19132, _ group : EventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)) -> EventLoopFuture<Void>? {
-        self.group = group
         var bootstrap = DatagramBootstrap(group: group).channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             
             // Set the handlers that are applied to the bound channel
@@ -87,7 +84,7 @@ public class Client {
         }
         
         let currentTime = Int(NSDate().timeIntervalSince1970 * 1000)
-        let promise = group!.next().makePromise(of: ServerInfo.self)
+        let promise = channel!.eventLoop.next().makePromise(of: ServerInfo.self)
         
         pings[address] = PingEntry(promise, currentTime + 7000, currentTime)
         self.sendUnconnectedPing(address, currentTime)
