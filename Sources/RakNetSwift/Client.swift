@@ -78,6 +78,7 @@ public class Client {
     
     public func sendBuffer(_ buffer : inout ByteBuffer, _ address : SocketAddress) {
         self.channel!.writeAndFlush(AddressedEnvelope(remoteAddress: address, data: buffer))
+            .whenSuccess { _ in /*ignore*/ }
     }
     
     public func ping(_ address : SocketAddress) -> EventLoopFuture<ServerInfo> {
