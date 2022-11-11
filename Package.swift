@@ -12,7 +12,7 @@ let package = Package(
             targets: ["RakNetSwift"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-nio.git", .exact("2.23.0"))
+        .package(url: "https://github.com/apple/swift-nio.git", "2.40.0"..<"2.43.0")
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
     ],
