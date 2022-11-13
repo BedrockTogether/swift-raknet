@@ -153,9 +153,11 @@ public class Client {
                 }
                 
                 let pingEntry = client!.pings[packet.remoteAddress]
-                client!.pings[packet.remoteAddress] = nil
-                pingEntry!.promise.succeed(ServerInfo.from(decodePk.info))
-                
+                if (pingEntry != nil) {
+                    client!.pings[packet.remoteAddress] = nil
+                    pingEntry!.promise.succeed(ServerInfo.from(decodePk.info))
+                }
+
                 break
             default:
                 break
