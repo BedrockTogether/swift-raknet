@@ -53,7 +53,7 @@ public class Listener {
     }
     
     public func listen<T : ConnectionListener>(_ connectionListener : T?, _ serverInfo : ServerInfo, _ host : String = "0.0.0.0", _ port : Int = 19132, _ group : EventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)) -> EventLoopFuture<Void>? {
-        serverInfo.serverId = Int(id)
+        serverInfo.serverId = id
         self.info = serverInfo
         self.connectionListener = connectionListener
         self.group = group

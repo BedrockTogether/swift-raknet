@@ -16,10 +16,10 @@ public class ServerInfo {
     public var currentPlayers : Int
     public var maxPlayers : Int
     public var gamemode : String
-    public var serverId : Int
+    public var serverId : Int64
         
     public init(_ motd : String, _ name : String, _ protocolVersion : Int, _ version : String, _ currentPlayers : Int,
-                _ maxPlayers : Int, _ gamemode : String, _ serverId : Int){
+                _ maxPlayers : Int, _ gamemode : String, _ serverId : Int64){
         self.motd = motd
         self.name = name
         self.protocolVersion = protocolVersion
@@ -36,6 +36,6 @@ public class ServerInfo {
     
     static func from(_ info: String) -> ServerInfo {
         let infos = info.split(separator: ";")
-        return ServerInfo(String(infos[1]), String(infos[7]), Int(infos[2])!, String(infos[3]), Int(infos[4])!, Int(infos[5])!, String(infos[8]), Int(infos[6])!)
+        return ServerInfo(String(infos[1]), String(infos[7]), Int(infos[2])!, String(infos[3]), Int(infos[4])!, Int(infos[5])!, String(infos[8]), Int64(infos[6])!)
     }
 }
