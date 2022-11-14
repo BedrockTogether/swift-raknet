@@ -35,7 +35,7 @@ public class ServerInfo {
     }
     
     static func from(_ info: String) -> ServerInfo {
-        let infos = info.split(separator: ";")
+        let infos = info.split(separator: ";", omittingEmptySubsequences: false)
         return ServerInfo(String(infos[1]), String(infos[7]), Int(infos[2])!, String(infos[3]), Int(infos[4])!, Int(infos[5])!, String(infos[8]), Int64(infos[6])!)
     }
 }
