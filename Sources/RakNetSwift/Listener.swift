@@ -142,14 +142,12 @@ public class Listener {
                 let addr = connection.address
                 if (self.connections[addr!] != nil) {
                     self.printer.print("Removed: \(addr!)")
-                    connection.close()
                     self.connections[addr!] = nil
                 }
             }
         } else {
             let addr = connection.address
             if (self.connections[addr!] != nil) {
-                connection.close()
                 self.connections[addr!] = nil
             }
         }

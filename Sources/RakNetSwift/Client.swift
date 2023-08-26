@@ -98,7 +98,8 @@ public class Client {
             if(!self.shutdown) {
                 //self.printer.print("Tick")
                 let currentTime = Int(NSDate().timeIntervalSince1970 * 1000)
-                for (address, pingEntry) in self.pings {
+                let pingsCopy = self.pings
+                for (address, pingEntry) in pingsCopy {
                     if (currentTime >= pingEntry.timeout) {
                         pingEntry.promise.fail(TimeoutError("Ping timeout"))
                         self.pings[address] = nil
